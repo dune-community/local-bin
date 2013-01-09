@@ -10,6 +10,11 @@ import sys
 # define directories
 _BASEDIR = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
 _SRCDIR = join(_BASEDIR, 'local', 'src')
+try:
+    os.mkdir(_SRCDIR)
+except OSError, os_error:
+    if os_error.errno != 17:
+        raise os_error
 
 def BASEDIR():
     return _BASEDIR
