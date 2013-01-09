@@ -14,7 +14,7 @@ import common
 filename='external-libraries.cfg'
 
 def download_library(library, src):
-    print('  downloading \'{library}\' from \'{src}\'... '.format(library=library, src=src), end='')
+    print('  downloading from \'{src}\'... '.format(src=src), end='')
     sys.stdout.flush()
     dest = join(common.SRCDIR(),src.split('/')[-1])
     filename = join(common.SRCDIR(), dest)
@@ -37,7 +37,7 @@ def download_library(library, src):
         if not os.path.abspath(join(common.SRCDIR(), extracted_dir_name)).startswith(common.SRCDIR()):
             raise Exception('unsafe filename in tar: \'{unsafe_name}\'!'.format(unsafe_name=extracted_dir_name))
         for name in names:
-            if not name.startswith(extracted_dir_name):
+            if not (name.startswith(extracted_dir_name + '/') or name is extracted_dir_name): 
                 raise Exception('tars containing more than one toplevel dir not supported!')
         if os.path.exists(join(common.SRCDIR(), extracted_dir_name)):
             print('not necessary (already exists)')
@@ -47,7 +47,7 @@ def download_library(library, src):
         tar.close()
     else:
         raise Exception('file is of wrong type (is \'{is_type}\')!'.format(is_type=filetype))
-    print('  moving \'{src}\' -> \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end = '')
+    print('  moving \'{src}\' to \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end = '')
     sys.stdout.flush()
     if os.path.exists(join(common.SRCDIR(), library)):
         print('not necessary (already exists)')
