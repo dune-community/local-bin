@@ -11,12 +11,13 @@ import tarfile
 
 import common
 
-filename='external-libraries.cfg'
+filename = common.external_libraries_cfg_filename
+
 
 def download_library(library, src):
     print('  downloading from \'{src}\'... '.format(src=src), end='')
     sys.stdout.flush()
-    dest = join(common.SRCDIR(),src.split('/')[-1])
+    dest = join(common.SRCDIR(), src.split('/')[-1])
     filename = join(common.SRCDIR(), dest)
     filetype = ''
     if os.path.exists(filename):
@@ -37,7 +38,7 @@ def download_library(library, src):
         if not os.path.abspath(join(common.SRCDIR(), extracted_dir_name)).startswith(common.SRCDIR()):
             raise Exception('unsafe filename in tar: \'{unsafe_name}\'!'.format(unsafe_name=extracted_dir_name))
         for name in names:
-            if not (name.startswith(extracted_dir_name + '/') or name is extracted_dir_name): 
+            if not (name.startswith(extracted_dir_name + '/') or name is extracted_dir_name):
                 raise Exception('tars containing more than one toplevel dir not supported!')
         if os.path.exists(join(common.SRCDIR(), extracted_dir_name)):
             print('not necessary (already exists)')
@@ -47,7 +48,7 @@ def download_library(library, src):
         tar.close()
     else:
         raise Exception('file is of wrong type (is \'{is_type}\')!'.format(is_type=filetype))
-    print('  moving \'{src}\' to \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end = '')
+    print('  moving \'{src}\' to \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end='')
     sys.stdout.flush()
     if os.path.exists(join(common.SRCDIR(), library)):
         print('not necessary (already exists)')
@@ -57,13 +58,13 @@ def download_library(library, src):
 # def download_library
 
 # main
-print('reading \'{filename}\': '.format(filename=filename), end='')
+print('reading \'{filename}\': '.format(filename=filename.split('/')[-1]), end='')
 config = ConfigParser.ConfigParser()
 try:
     config.readfp(open(filename))
 except:
     raise Exception('Could not open \'{filename}\' with configparser!'.format(filename=filename))
-libraries=config.sections()
+libraries = config.sections()
 if len(libraries) == 0:
     print(' no external libraries specified')
     exit
