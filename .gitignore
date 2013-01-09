@@ -1,2 +1,4 @@
 alugridversion
 *.pyc
+.project
+.pydevproject
