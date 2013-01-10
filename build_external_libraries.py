@@ -27,14 +27,6 @@ def build_library(library, build_commands):
         build_command = build_command.replace('$CC', '{CC}'.format(CC=common.CC()))
         build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=common.CXX()))
         build_command = build_command.replace('$F77', '{F77}'.format(F77=common.F77()))
-#        build_command = build_command[1:-1].lstrip().rstrip().split()
-#        for ii in range(len(build_command)):
-#            build_command[ii] = build_command[ii].replace('$BASEDIR', '{BASEDIR}'.format(BASEDIR=common.BASEDIR()))
-#            build_command[ii] = build_command[ii].replace('$SRCDIR', '{SRCDIR}'.format(SRCDIR=common.SRCDIR()))
-#            build_command[ii] = build_command[ii].replace('$CXXFLAGS', '{CXXFLAGS}'.format(CXXFLAGS=common.CXXFLAGS()))
-#            build_command[ii] = build_command[ii].replace('$CC', '{CC}'.format(CC=common.CC()))
-#            build_command[ii] = build_command[ii].replace('$CXX', '{CXX}'.format(CXX=common.CXX()))
-#            build_command[ii] = build_command[ii].replace('$F77', '{F77}'.format(F77=common.F77()))
         print('  calling \'{build_command}\':'.format(build_command=build_command))
         subprocess.call(build_command,
                         shell=True,
@@ -62,27 +54,5 @@ else:
 for library in libraries:
     print(library + ':')
     if not config.has_option(library, 'build'):
-        raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'{library]\''.format(library=library))
+        raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{library}]\''.format(library=library))
     build_library(library, config.get(library, 'build'))
-
-## eigen
-#print('building eigen:')
-#common.extract_in_srcdir('eigen-3.1.0.tar.gz', 'eigen-eigen-ca142d0540d3', 'eigen')
-#eigen_buildir = join(common.SRCDIR(), 'eigen', 'build')
-#try:
-#    os.mkdir(eigen_buildir)
-#except OSError, os_error:
-#    if os_error.errno != 17:
-#        raise os_error
-#eigen_cmake = ['cmake', '..',
-#               '-DCMAKE_INSTALL_PREFIX=' + join(common.BASEDIR(), 'local'),
-#               '-DCMAKE_CXX_COMPILER=' + common.CXX()]
-#subprocess.call(eigen_cmake,
-#                cwd=eigen_buildir,
-#                stdout=sys.stdout, stderr=sys.stderr)
-#subprocess.call(['make'],
-#                cwd=eigen_buildir,
-#                stdout=sys.stdout, stderr=sys.stderr)
-#subprocess.call(['make', 'install'],
-#                cwd=eigen_buildir,
-#                stdout=sys.stdout, stderr=sys.stderr)
