@@ -18,6 +18,7 @@ except OSError, os_error:
 
 external_libraries_cfg_filename = join(_BASEDIR, 'external-libraries.cfg')
 dune_modules_cfg_filename = join(_BASEDIR, 'dune-modules.cfg')
+demos_cfg_filename = join(_BASEDIR, 'demos.cfg')
 
 def BASEDIR():
     return _BASEDIR
