@@ -52,8 +52,10 @@ for command in commands:
     print('  ' + command)
 for command in commands:
     print('calling ' + command + ':')
-    subprocess.call(command,
-                shell=True,
-                cwd=common.BASEDIR(),
-                stdout=sys.stdout,
-                stderr=sys.stderr)
+    ret = subprocess.call(command,
+                          shell=True,
+                          cwd=common.BASEDIR(),
+                          stdout=sys.stdout,
+                          stderr=sys.stderr)
+    if ret != 0:
+        break
