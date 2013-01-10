@@ -17,6 +17,7 @@ except OSError, os_error:
         raise os_error
 
 external_libraries_cfg_filename = join(_BASEDIR, 'external-libraries.cfg')
+dune_modules_cfg_filename = join(_BASEDIR, 'dune-modules.cfg')
 
 def BASEDIR():
     return _BASEDIR
@@ -28,6 +29,7 @@ _CC = ''
 _CXX = ''
 _F77 = ''
 _CXXFLAGS = ''
+_config_opts_filename = ''
 _config_opts_parsed = False
 
 def _parse_config_opts():
@@ -36,6 +38,7 @@ def _parse_config_opts():
     global _CXX
     global _F77
     global _CXXFLAGS
+    global _config_opts_filename
     global _config_opts_parsed
 
     # get CC from environment
@@ -50,8 +53,8 @@ def _parse_config_opts():
         raise
 
     # read corresponding config.opts
-    config_opts_filename = 'config.opts.' + env_CC
-    filename = join(_BASEDIR, config_opts_filename)
+    _config_opts_filename = 'config.opts.' + env_CC
+    filename = join(_BASEDIR, _config_opts_filename)
 #    print('reading from \'{filename}\':'.format(filename=config_opts_filename))
     try:
         config_opts = open(filename).read()
@@ -126,3 +129,8 @@ def CXXFLAGS():
     if not _config_opts_parsed:
         _parse_config_opts()
     return _CXXFLAGS
+
+def config_opts_filename():
+    if not _config_opts_parsed:
+        _parse_config_opts()
+    return _config_opts_filename
