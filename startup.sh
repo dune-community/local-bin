@@ -11,16 +11,6 @@ else
   rm $LOG_FILE &> /dev/null
 fi
 
-echo -ne "initializing submodules (this may take a while)... "
-LOG_FILE=$LOG_DIR/initialize_submodules.log
-git submodule update --init &> $LOG_FILE
-if [ $? == 0 ] ; then
-  echo "done"
-else
-  echo "failed (see $LOG_FILE for details)" >&2
-  exit 1
-fi
-
 echo -ne "writing path definitions... "
 LOG_FILE=$LOG_DIR/gen_PATH.log
 ./local/bin/gen_path.py &> $LOG_FILE
