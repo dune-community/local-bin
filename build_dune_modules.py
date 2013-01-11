@@ -54,6 +54,7 @@ for command in commands:
     print('calling ' + command + ':')
     ret = subprocess.call(command,
                           shell=True,
+                          env=common.env(),
                           cwd=common.BASEDIR(),
                           stdout=sys.stdout,
                           stderr=sys.stderr)
