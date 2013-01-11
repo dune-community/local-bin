@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-#import os
 from os.path import join
-#import subprocess
-#import sys
 
 import common as common
 
