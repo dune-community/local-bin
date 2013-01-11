@@ -33,6 +33,7 @@ def build_demo(demo, build_commands):
         print('  calling \'{build_command}\':'.format(build_command=build_command))
         subprocess.call(build_command,
                         shell=True,
+                        env=common.env(),
                         cwd=demo_dir,
                         stdout=sys.stdout,
                         stderr=sys.stderr)
