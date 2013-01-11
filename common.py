@@ -135,3 +135,27 @@ def config_opts_filename():
     if not _config_opts_parsed:
         _parse_config_opts()
     return _config_opts_filename
+
+def env():
+    if not _config_opts_parsed:
+        _parse_config_opts()
+    env = os.environ
+    env['CC'] = _CC
+    env['CXX'] = _CXX
+    env['F77'] = _F77
+    env['CXXFLAGS'] = _CXXFLAGS 
+    env['BASEDIR'] = _BASEDIR
+    env['SRCDIR'] = _SRCDIR
+    path = join(_BASEDIR, 'local', 'bin')
+    if 'PATH' in env:
+        path += ':' + env['PATH']
+    env['PATH'] = path
+    ld_library_path = join(_BASEDIR, 'local', 'lib')
+    if 'LD_LIBRARY_PATH' in env:
+        ld_library_path += ':' + env['LD_LIBRARY_PATH']
+    env['LD_LIBRARY_PATH'] = ld_library_path
+    pkg_config_path = join(_BASEDIR, 'local', 'lib', 'pkgconfig')
+    if 'PKG_CONFIG_PATH' in env:
+        pkg_config_path += ':' + env['PKG_CONFIG_PATH']
+    env['PKG_CONFIG_PATH'] = pkg_config_path
+    
