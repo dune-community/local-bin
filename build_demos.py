@@ -19,6 +19,7 @@ def build_demo(demo, build_commands):
     except OSError, os_error:
         if os_error.errno != 17:
             raise os_error
+    ret = 0
     for build_command in build_commands.split(','):
         build_command = build_command.lstrip().rstrip()
         if not (build_command[0] == '\'' and build_command[-1] == '\''):
@@ -31,12 +32,13 @@ def build_demo(demo, build_commands):
         build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=common.CXX()))
         build_command = build_command.replace('$F77', '{F77}'.format(F77=common.F77()))
         print('  calling \'{build_command}\':'.format(build_command=build_command))
-        subprocess.call(build_command,
-                        shell=True,
-                        env=common.env(),
-                        cwd=demo_dir,
-                        stdout=sys.stdout,
-                        stderr=sys.stderr)
+        ret += subprocess.call(build_command,
+                               shell=True,
+                               env=common.env(),
+                               cwd=demo_dir,
+                               stdout=sys.stdout,
+                               stderr=sys.stderr)
+    return not bool(ret)
 # build_library
 
 # main
@@ -56,8 +58,10 @@ else:
         print(demo + ' ', end='')
     print('')
 
+reports = []
 for demo in demos:
     print(demo + ':')
+    reports.append(demo + ':')
     if not config.has_option(demo, 'build'):
         raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{demo}]\''.format(demo=demo))
     demo_is_built = build_demo(demo, config.get(demo, 'build'))
@@ -66,8 +70,16 @@ for demo in demos:
             msg = config.get(demo, 'msg').lstrip().rstrip()
             if not (msg[0] == '\'' and msg[-1] == '\''):
                 print('WARNING: \'msg\' should be of the form \'some example message\'!')
-            print('  {msg}'.format(msg=msg[1:-1]))
+                reports.append('  {msg}'.format(msg=msg))
+            else:
+                reports.append('  {msg}'.format(msg=msg[1:-1]))
         else:
-            print('  built successfuly')
+            reports.append('  built successfuly')
     else:
-        print('  built failed')
+        reports.append('  built failed')
+if len(reports) > 0:
+    print('===========================================================')
+    print('the following demos are available, run \'. PATH.sh\' first:')
+    print('===========================================================')
+    for report in reports:
+        print(report)
