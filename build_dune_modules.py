@@ -60,3 +60,4 @@ for command in commands:
                           stderr=sys.stderr)
     if ret != 0:
         break
+        sys.exit(1)
