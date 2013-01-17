@@ -29,10 +29,11 @@ if 'general' in config.sections():
         dune_modules = config.get('general', 'order')
         assert(len(dune_modules) > 0)
         for dune_module in dune_modules.split():
+            local_all = all_
             if config.has_section(dune_module) and config.has_option(dune_module, 'all'):
-                all_ = config.get(dune_module, 'all')
-                assert(len(all_) > 0)
-            for a_ in all_.split():
+                local_all = config.get(dune_module, 'all')
+                assert(len(local_all) > 0)
+            for a_ in local_all.split():
                 commands.append(('./dune-common/bin/dunecontrol'
                                 + ' --opts={config_opts}'
                                 + ' --only={dune_module}'
