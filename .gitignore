@@ -2,3 +2,11 @@ alugridversion
 *.pyc
 .project
 .pydevproject
+m2ps
+ugmesh
+ugmgs2
+ugmgs3
+ugnetgen
+ugpfm2
+ugpfm3
+ugstl
