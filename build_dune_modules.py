@@ -60,5 +60,4 @@ for command in commands:
                           stdout=sys.stdout,
                           stderr=sys.stderr)
     if ret != 0:
-        break
         sys.exit(1)
