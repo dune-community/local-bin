@@ -8,6 +8,8 @@ from os.path import join
 import shutil
 import sys
 import tarfile
+import subprocess
+
 
 import common
 
@@ -57,6 +59,22 @@ def download_library(library, src):
         print('done')
 # def download_library
 
+
+def git_clone_library(library, src):
+    print('  cloning \'{src}\':'.format(src=src))
+    sys.stdout.flush()
+    if os.path.exists(join(common.SRCDIR(), library)):
+        print('not necessary (already exists)')
+    else:
+        ret = subprocess.call('git clone ' + src + ' ' + library,
+                      shell=True,
+                      env=common.env(),
+                      cwd=common.SRCDIR(),
+                      stdout=sys.stdout,
+                      stderr=sys.stderr)
+# git_clone_library
+
+
 # main
 print('reading \'{filename}\': '.format(filename=filename.split('/')[-1]), end='')
 config = ConfigParser.ConfigParser()
@@ -75,6 +93,9 @@ else:
 
 for library in libraries:
     print(library + ':')
-    if not config.has_option(library, 'src'):
-        raise Exception('missing \'src=some_url\' in section \'{library]\''.format(library=library))
-    download_library(library, config.get(library, 'src'))
+    if config.has_option(library, 'git'):
+        git_clone_library(library, config.get(library, 'git'))
+    elif config.has_option(library, 'src'):
+        download_library(library, config.get(library, 'src'))
+    else:
+        raise Exception('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library]\''.format(library=library))
