@@ -38,6 +38,8 @@ def build_demo(demo, build_commands):
                                cwd=demo_dir,
                                stdout=sys.stdout,
                                stderr=sys.stderr)
+        if ret != 0:
+            return not bool (ret)
     return not bool(ret)
 # build_library
 
