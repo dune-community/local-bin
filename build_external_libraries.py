@@ -17,9 +17,10 @@ def build_library(library, config):
     if not os.path.isdir(src_dir):
         raise Exception('\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(path=src_dir))
     build_commands = config.get(library, 'build')
-    abort = True
-    if config.has_option(library, 'abort'):
-        abort = config.getboolean(library, 'abort')
+#    abort = True
+#    if config.has_option(library, 'abort'):
+#        abort = config.getboolean(library, 'abort')
+    ret = 0
     for build_command in build_commands.split(','):
         build_command = build_command.lstrip().rstrip()
         if not (build_command[0] == '\'' and build_command[-1] == '\''):
@@ -32,14 +33,15 @@ def build_library(library, config):
         build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=common.CXX()))
         build_command = build_command.replace('$F77', '{F77}'.format(F77=common.F77()))
         print('  calling \'{build_command}\':'.format(build_command=build_command))
-        ret = subprocess.call(build_command,
+        ret += subprocess.call(build_command,
                               shell=True,
                               env=common.env(),
                               cwd=src_dir,
                               stdout=sys.stdout,
                               stderr=sys.stderr)
-        if ret != 0 and abort:
-            break
+        if ret != 0:
+            return not bool(ret)
+    return not bool(ret)
 # build_library
 
 # main
@@ -58,8 +60,19 @@ else:
         print(library + ' ', end='')
     print('')
 
+reports = []
 for library in libraries:
-    print(library + ':')
     if not config.has_option(library, 'build'):
         raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{library}]\''.format(library=library))
-    build_library(library, config)
+    success = build_library(library, config)
+    if success:
+        reports.append(library + ': succeeded')
+    else:
+        reports.append(library + ': failed')
+
+if len(reports) > 0:
+    print('================================================')
+    print('tried to build the following external libraries:')
+    print('================================================')
+    for report in reports:
+        print(report)
