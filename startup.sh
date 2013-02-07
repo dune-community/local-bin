@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # create log dir
-LOG_DIR=$(mktemp -d /tmp/dune_rb_demos.XXXXXXXX)
+LOG_DIR=$(mktemp -d /tmp/dune_demos.XXXXXXXX)
 LOG_FILE=$LOG_DIR/test.log
 touch $LOG_FILE &> /dev/null
 if [ $? != 0 ] ; then
