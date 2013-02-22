@@ -16,40 +16,41 @@ LOG_FILE=$LOG_DIR/gen_PATH.log
 ./local/bin/gen_path.py &> $LOG_FILE
 if [ $? == 0 ] ; then
   source PATH &>> $LOG_FILE
-  echo "done"
+  echo "done (run '. PATH.sh' from now on)"
 else
   echo "failed (see $LOG_FILE for details)" >&2
   exit 1
 fi
 
-echo -ne "downloading external libraries (this may take a while)... "
+echo "downloading external libraries:"
 LOG_FILE=$LOG_DIR/download_external_libraries.log
-./local/bin/download_external_libraries.py &> $LOG_FILE
-if [ $? == 0 ] ; then
-  echo "done"
-else
-  echo "failed (see $LOG_FILE for details)" >&2
-  exit 1
-fi
+./local/bin/download_external_libraries.py 1
+#if [ $? == 0 ] ; then
+  #echo "done"
+#else
+  #echo "failed (see $LOG_FILE for details)" >&2
+  #exit 1
+#fi
 
-echo -ne "building external libraries (this may take a while)... "
+echo "building external libraries:"
 LOG_FILE=$LOG_DIR/build_external_libraries.log
-./local/bin/build_external_libraries.py &> $LOG_FILE
-if [ $? == 0 ] ; then
-  echo "done"
-else
-  echo "failed (see $LOG_FILE for details)" >&2
-  exit 1
-fi
+./local/bin/build_external_libraries.py 1
+#if [ $? == 0 ] ; then
+  #echo "done"
+#else
+  #echo "failed (see $LOG_FILE for details)" >&2
+  #exit 1
+#fi
 
-echo -ne "building dune modules (this may take a while)... "
+echo "building dune modules:"
 LOG_FILE=$LOG_DIR/build_dune_modules.log
-./local/bin/build_dune_modules.py &> $LOG_FILE
-if [ $? == 0 ] ; then
-  echo "done"
-else
-  echo "failed (see $LOG_FILE for details)" >&2
-  exit 1
-fi
+./local/bin/build_dune_modules.py 1
+#if [ $? == 0 ] ; then
+  #echo "done"
+#else
+  #echo "failed (see $LOG_FILE for details)" >&2
+  #exit 1
+#fi
 
-./local/bin/build_demos.py
+echo "building demos:"
+./local/bin/build_demos.py 1
