@@ -106,11 +106,11 @@ for demo in demos:
                         print('WARNING: \'msg\' should be of the form \'some example message\'!')
                     reports.append('  {msg}'.format(msg=msg))
                     if not verbose:
-                        print('   run ' + msg)
+                        print('   \'' + msg + '\'')
                 else:
                     reports.append('  {msg}'.format(msg=msg[1:-1]))
                     if not verbose:
-                        print('   run ' + msg[1:-1])
+                        print('   \'' + msg[1:-1] + '\'')
             else:
                 reports.append('  built successfuly')
         else:
