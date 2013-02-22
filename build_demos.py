@@ -12,6 +12,11 @@ import common
 filename = common.demos_cfg_filename
 
 
+verbose = True
+if len(sys.argv) > 1:
+    verbose = False
+
+
 def build_demo(demo, build_commands):
     demo_dir = join(common.BASEDIR(), 'demos')
     try:
@@ -23,7 +28,9 @@ def build_demo(demo, build_commands):
     for build_command in build_commands.split(','):
         build_command = build_command.lstrip().rstrip()
         if not (build_command[0] == '\'' and build_command[-1] == '\''):
-            raise Exception('build commands have to be of the form \'command_1\' (is {cmd})!'.format(cmd=build_command))
+            if verbose:
+                print('build commands have to be of the form \'command_1\' (is {cmd}), aborting!'.format(cmd=build_command))
+                return False
         build_command = build_command[1:-1].lstrip().rstrip()
         build_command = build_command.replace('$BASEDIR', '{BASEDIR}'.format(BASEDIR=common.BASEDIR()))
         build_command = build_command.replace('$SRCDIR', '{SRCDIR}'.format(SRCDIR=common.SRCDIR()))
@@ -31,25 +38,36 @@ def build_demo(demo, build_commands):
         build_command = build_command.replace('$CC', '{CC}'.format(CC=common.CC()))
         build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=common.CXX()))
         build_command = build_command.replace('$F77', '{F77}'.format(F77=common.F77()))
-        print('  calling \'{build_command}\':'.format(build_command=build_command))
-        ret += subprocess.call(build_command,
-                               shell=True,
-                               env=common.env(),
-                               cwd=demo_dir,
-                               stdout=sys.stdout,
-                               stderr=sys.stderr)
+        if verbose:
+            print('  calling \'{build_command}\':'.format(build_command=build_command))
+            ret += subprocess.call(build_command,
+                                   shell=True,
+                                   env=common.env(),
+                                   cwd=demo_dir,
+                                   stdout=sys.stdout,
+                                   stderr=sys.stderr)
+        else:
+            with open(os.devnull, "w") as devnull:
+                ret += subprocess.call(build_command,
+                                       shell=True,
+                                       env=common.env(),
+                                       cwd=demo_dir,
+                                       stdout=devnull,
+                                       stderr=devnull)
         if ret != 0:
-            return not bool (ret)
+            return not bool(ret)
     return not bool(ret)
 # build_library
 
 # main
-print('reading \'{filename}\': '.format(filename=filename.split('/')[-1]), end='')
+if verbose:
+    print('reading \'{filename}\': '.format(filename=filename.split('/')[-1]), end='')
 config = ConfigParser.ConfigParser()
 try:
     config.readfp(open(filename))
 except:
-    print('nothing to do (does not exist)')
+    if verbose:
+        print('nothing to do (does not exist)')
     pass
 demos = config.sections()
 if len(demos) == 0:
@@ -57,31 +75,57 @@ if len(demos) == 0:
     exit
 else:
     for demo in demos:
-        print(demo + ' ', end='')
-    print('')
+        if verbose:
+            print(demo + ' ', end='')
+    if verbose:
+        print('')
 
 reports = []
+failure = 0
 for demo in demos:
-    print(demo + ':')
+    if verbose:
+        print(demo + ':')
+    else:
+        print('  ' + demo + '... ', end='')
+        sys.stdout.flush()
     reports.append(demo + ':')
     if not config.has_option(demo, 'build'):
-        raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{demo}]\''.format(demo=demo))
-    demo_is_built = build_demo(demo, config.get(demo, 'build'))
-    if demo_is_built:
-        if config.has_option(demo, 'msg'):
-            msg = config.get(demo, 'msg').lstrip().rstrip()
-            if not (msg[0] == '\'' and msg[-1] == '\''):
-                print('WARNING: \'msg\' should be of the form \'some example message\'!')
-                reports.append('  {msg}'.format(msg=msg))
-            else:
-                reports.append('  {msg}'.format(msg=msg[1:-1]))
+        if verbose:
+            print('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{demo}]\', aborting!'.format(demo=demo))
         else:
-            reports.append('  built successfuly')
+            print('failed')
     else:
-        reports.append('  built failed')
-if len(reports) > 0:
-    print('===========================================================')
-    print('the following demos are available, run \'. PATH.sh\' first:')
-    print('===========================================================')
-    for report in reports:
-        print(report)
+        demo_is_built = build_demo(demo, config.get(demo, 'build'))
+        if demo_is_built:
+            if not verbose:
+                print('done')
+            if config.has_option(demo, 'msg'):
+                msg = config.get(demo, 'msg').lstrip().rstrip()
+                if not (msg[0] == '\'' and msg[-1] == '\''):
+                    if verbose:
+                        print('WARNING: \'msg\' should be of the form \'some example message\'!')
+                    reports.append('  {msg}'.format(msg=msg))
+                    if not verbose:
+                        print('   run ' + msg)
+                else:
+                    reports.append('  {msg}'.format(msg=msg[1:-1]))
+                    if not verbose:
+                        print('   run ' + msg[1:-1])
+            else:
+                reports.append('  built successfuly')
+        else:
+            failure += 1
+            if verbose:
+                reports.append('  build failed')
+            else:
+                print('failed')
+if verbose:
+    if len(reports) > 0:
+        print('===========================================================')
+        print('the following demos are available, run \'. PATH.sh\' first:')
+        print('===========================================================')
+        for report in reports:
+            print(report)
+else:
+    if failure > 0:
+        print('  call \'./local/bin/build_demos.py\' manually to examine errors')
