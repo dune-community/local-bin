@@ -54,7 +54,7 @@ def _parse_config_opts():
         raise
 
     # read corresponding config.opts
-    _config_opts_filename = 'config.opts.' + env_CC
+    _config_opts_filename = 'config.opts.' + os.path.basename(env_CC)
     filename = join(_BASEDIR, _config_opts_filename)
 #    print('reading from \'{filename}\':'.format(filename=config_opts_filename))
     try:
