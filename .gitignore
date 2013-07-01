@@ -10,3 +10,7 @@ ugnetgen
 ugpfm2
 ugpfm3
 ugstl
+activate*
+python*
+pip*
+easy_install*
