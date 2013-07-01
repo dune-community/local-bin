@@ -39,7 +39,7 @@ def download_library(library, src):
             print('done')
     if verbose:
         print('  unpacking \'{filename}\' '.format(filename=filename.split('/')[-1]), end='')
-    if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar'):
+    if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith('application/x-bzip2'):
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
