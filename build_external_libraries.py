@@ -17,7 +17,13 @@ if len(sys.argv) > 1:
 
 
 def build_library(library, config):
-    src_dir = join(common.SRCDIR(), library)
+    no_dir = False
+    if config.has_option(library, 'only_build'):
+        no_dir = bool(config.get(library, 'only_build'))
+    if no_dir:
+        src_dir = common.SRCDIR()
+    else:
+        src_dir = join(common.SRCDIR(), library)
     if not os.path.isdir(src_dir):
         raise Exception('\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(path=src_dir))
     build_commands = config.get(library, 'build')

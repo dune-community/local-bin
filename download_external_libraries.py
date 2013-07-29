@@ -137,19 +137,25 @@ for library in libraries:
         print('  ' + library + '... ', end='')
         sys.stdout.flush()
     success = False
-    if config.has_option(library, 'git'):
-        success = git_clone_library(library, config.get(library, 'git'))
-    elif config.has_option(library, 'src'):
-        success = download_library(library, config.get(library, 'src'))
-    else:
-        if verbose:
-            print('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library]\', aborting!'.format(library=library))
-    if not verbose:
-        if success:
-            print('done')
+    download=True
+    if config.has_option(library, 'only_build'):
+        download = not bool(config.get(library, 'only_build'))
+    if download:
+        if config.has_option(library, 'git'):
+            success = git_clone_library(library, config.get(library, 'git'))
+        elif config.has_option(library, 'src'):
+            success = download_library(library, config.get(library, 'src'))
         else:
-            failures += 1
-            print('failed')
+            if verbose:
+                print('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!'.format(library=library))
+        if not verbose:
+            if success:
+                print('done')
+            else:
+                failures += 1
+                print('failed')
+    else:
+        print('nothing to do, since \'only_build\' is True')
 if not verbose:
     if failures > 0:
         print('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
