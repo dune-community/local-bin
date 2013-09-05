@@ -13,6 +13,5 @@ with open(join(common.BASEDIR(), 'PATH.sh'), 'w') as pathfile:
     pathfile.write('export CC={CC}\n'.format(CC=common.CC()))
     pathfile.write('export CXX={CXX}\n'.format(CXX=common.CXX()))
     pathfile.write('export F77={F77}\n'.format(F77=common.F77()))
-    pathfile.write('export CXXFLAGS=\'{CXXFLAGS}\'\n'.format(CXXFLAGS=common.CXXFLAGS()))
     pathfile.write('export PYTHON_VERSION=2.7\n')
-    pathfile.write('[ -e $BASEDIR/virtualenv/bin/activate ] && source $BASEDIR/virtualenv/bin/activate\n')
+    pathfile.write('[ -e $BASEDIR/virtualenv/bin/activate ] && . $BASEDIR/virtualenv/bin/activate\n')
