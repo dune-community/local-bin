@@ -57,7 +57,6 @@ def build_demo(demo, build_commands):
         if ret != 0:
             return not bool(ret)
     return not bool(ret)
-# build_library
 
 # main
 if verbose:
@@ -129,3 +128,4 @@ if verbose:
 else:
     if failure > 0:
         print('  call \'./local/bin/build_demos.py\' manually to examine errors')
+sys.exit(failure)

@@ -118,3 +118,4 @@ if verbose:
 else:
     if failure > 0:
         print('  call \'./local/bin/build_external_libraries.py\' manually to examine errors')
+sys.exit(failure)

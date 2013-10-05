@@ -94,3 +94,4 @@ except:
                           cwd=common.BASEDIR(),
                           stdout=sys.stdout,
                           stderr=sys.stderr)
+sys.exit(ret)

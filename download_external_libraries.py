@@ -159,3 +159,4 @@ for library in libraries:
 if not verbose:
     if failures > 0:
         print('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
+sys.exit(failures)
