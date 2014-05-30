@@ -137,7 +137,7 @@ def config_opts_filename():
     return _config_opts_filename
 
 BOOST_TOOLSETS = {'gcc-4.{}'.format(i) : 'gcc' for i in range (4,18)}
-BOOST_TOOLSETS.update({ 'icc': 'intel-linux', 'clang': 'clang-linux'})
+BOOST_TOOLSETS.update({ 'icc': 'intel-linux', 'clang': 'clang'})
 
 def env():
     if not _config_opts_parsed:
