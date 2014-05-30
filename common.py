@@ -136,6 +136,9 @@ def config_opts_filename():
         _parse_config_opts()
     return _config_opts_filename
 
+BOOST_TOOLSETS = {'gcc-4.{}'.format(i) : 'gcc' for i in range (4,18)}
+BOOST_TOOLSETS.update({ 'icc': 'intel-linux', 'clang': 'clang-linux'})
+
 def env():
     if not _config_opts_parsed:
         _parse_config_opts()
@@ -146,6 +149,7 @@ def env():
     env['CXXFLAGS'] = _CXXFLAGS 
     env['BASEDIR'] = _BASEDIR
     env['SRCDIR'] = _SRCDIR
+    env['BOOST_TOOLSET'] = BOOST_TOOLSETS.get(os.path.basename(_CC), 'gcc')
     path = join(_BASEDIR, 'local', 'bin')
     if 'PATH' in env:
         path += ':' + env['PATH']
