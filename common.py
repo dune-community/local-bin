@@ -150,6 +150,7 @@ def env():
     env['BASEDIR'] = _BASEDIR
     env['SRCDIR'] = _SRCDIR
     env['BOOST_TOOLSET'] = BOOST_TOOLSETS.get(os.path.basename(_CC), 'gcc')
+    env['BOOST_ROOT'] = join(_BASEDIR, 'local')
     path = join(_BASEDIR, 'local', 'bin')
     if 'PATH' in env:
         path += ':' + env['PATH']
