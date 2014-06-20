@@ -65,7 +65,7 @@ try:
             print('calling ' + command + ':')
             ret = subprocess.call(command,
                                 shell=True,
-                                env=common.env(),
+                                env=common.make_env(),
                                 cwd=common.BASEDIR(),
                                 stdout=sys.stdout,
                                 stderr=sys.stderr)
@@ -75,7 +75,7 @@ try:
             with open(os.devnull, "w") as devnull:
                 ret = subprocess.call(command,
                                     shell=True,
-                                    env=common.env(),
+                                    env=common.make_env(),
                                     cwd=common.BASEDIR(),
                                     stdout=devnull,
                                     stderr=devnull)
@@ -90,7 +90,7 @@ except:
         print(': does not exist, calling duncontrol')
     ret = subprocess.call('./dune-common/bin/dunecontrol --opts={} all'.format(common.config_opts_filename()),
                           shell=True,
-                          env=common.env(),
+                          env=common.make_env(),
                           cwd=common.BASEDIR(),
                           stdout=sys.stdout,
                           stderr=sys.stderr)

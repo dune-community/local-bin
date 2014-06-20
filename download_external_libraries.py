@@ -93,7 +93,7 @@ def git_clone_library(library, src):
         if verbose:
             ret = subprocess.call('git clone ' + src + ' ' + library,
                                   shell=True,
-                                  env=common.env(),
+                                  env=common.make_env(),
                                   cwd=common.SRCDIR(),
                                   stdout=sys.stdout,
                                   stderr=sys.stderr)
@@ -101,7 +101,7 @@ def git_clone_library(library, src):
             with open(os.devnull, "w") as devnull:
                 ret = subprocess.call('git clone ' + src + ' ' + library,
                                       shell=True,
-                                      env=common.env(),
+                                      env=common.make_env(),
                                       cwd=common.SRCDIR(),
                                       stdout=devnull,
                                       stderr=devnull)

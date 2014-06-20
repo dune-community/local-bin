@@ -44,7 +44,7 @@ def build_library(library, config):
             out = sys.stdout if verbose else devnull
             ret += subprocess.call(build_command,
                                   shell=True,
-                                  env=common.env(),
+                                  env=common.make_env(),
                                   cwd=src_dir,
                                   stdout=out,
                                   stderr=err)

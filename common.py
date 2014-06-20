@@ -139,7 +139,8 @@ def config_opts_filename():
 BOOST_TOOLSETS = {'gcc-4.{}'.format(i) : 'gcc' for i in range (4,18)}
 BOOST_TOOLSETS.update({ 'icc': 'intel-linux', 'clang': 'clang'})
 
-def env():
+
+def make_env():
     if not _config_opts_parsed:
         _parse_config_opts()
     env = os.environ
@@ -163,4 +164,5 @@ def env():
     if 'PKG_CONFIG_PATH' in env:
         pkg_config_path += ':' + env['PKG_CONFIG_PATH']
     env['PKG_CONFIG_PATH'] = pkg_config_path
-    
+    return env
+

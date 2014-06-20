@@ -42,7 +42,7 @@ def build_demo(demo, build_commands):
             print('  calling \'{build_command}\':'.format(build_command=build_command))
             ret += subprocess.call(build_command,
                                    shell=True,
-                                   env=common.env(),
+                                   env=common.make_env(),
                                    cwd=demo_dir,
                                    stdout=sys.stdout,
                                    stderr=sys.stderr)
@@ -50,7 +50,7 @@ def build_demo(demo, build_commands):
             with open(os.devnull, "w") as devnull:
                 ret += subprocess.call(build_command,
                                        shell=True,
-                                       env=common.env(),
+                                       env=common.make_env(),
                                        cwd=demo_dir,
                                        stdout=devnull,
                                        stderr=devnull)
