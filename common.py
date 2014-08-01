@@ -118,7 +118,7 @@ class LocalConfig(object):
         return env
 
     def command_sep(self):
-        return ';'
+        return ','
 
 
 def _prep_build_command(verbose, local_config, build_command):
