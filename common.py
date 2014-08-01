@@ -2,90 +2,51 @@
 
 from __future__ import print_function
 import os
-from os.path import (join, exists)
-import shutil
+from os.path import join
+import logging
 import subprocess
 import sys
 
-# define directories
-_BASEDIR = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
-_SRCDIR = join(_BASEDIR, 'local', 'src')
-try:
-    os.mkdir(_SRCDIR)
-except OSError, os_error:
-    if os_error.errno != 17:
-        raise os_error
+VERBOSE = len(sys.argv) <= 1
 
-external_libraries_cfg_filename = join(_BASEDIR, 'external-libraries.cfg')
-dune_modules_cfg_filename = join(_BASEDIR, 'dune-modules.cfg')
-demos_cfg_filename = join(_BASEDIR, 'demos.cfg')
 
-def BASEDIR():
-    return _BASEDIR
+class LocalConfig(object):
 
-def SRCDIR():
-    return _SRCDIR
-
-_CC = ''
-_CXX = ''
-_F77 = ''
-_CXXFLAGS = ''
-_config_opts_filename = ''
-_config_opts_parsed = False
-
-def _parse_config_opts():
-    # use global variables
-    global _CC
-    global _CXX
-    global _F77
-    global _CXXFLAGS
-    global _config_opts_filename
-    global _config_opts_parsed
-
-    # get CC from environment
-    env_CC = ''
-    try:
-        env_CC = os.environ['CC']
-    except AttributeError:
-        raise Exception('ERROR: missing environment variable \'CC\'!')
-    except KeyError:
-        raise Exception('ERROR: missing environment variable \'CC\'!')
-    except:
-        raise
-
-    # read corresponding config.opts
-    _config_opts_filename = 'config.opts.' + os.path.basename(env_CC)
-    filename = join(_BASEDIR, _config_opts_filename)
-#    print('reading from \'{filename}\':'.format(filename=config_opts_filename))
-    try:
-        config_opts = open(filename).read()
-    except:
-        raise Exception('ERROR: could not read from \'{filename}\'!'.format(filename=filename))
-    config_opts = config_opts.replace('CONFIGURE_FLAGS=', '').replace('"', '').replace('\\', '').replace('\n', ' ')
-
-    # read and remove CXXFLAGS first
-    _CXXFLAGS = config_opts.split('CXXFLAGS')[1]
-    config_opts = config_opts.split('CXXFLAGS')[0]
-    if _CXXFLAGS[0] != '=':
-        raise Exception('ERROR: no suitable \'CXXFLAGS=\'some_flags\'\' found in \'{filename}\'!'.format(filename=filename))
-    _CXXFLAGS = _CXXFLAGS[1:]
-    if _CXXFLAGS[0] == '\'':
-        _CXXFLAGS = _CXXFLAGS[1:]
-        tmp = _CXXFLAGS
-        _CXXFLAGS = _CXXFLAGS[:_CXXFLAGS.index('\'')]
-        config_opts += ' ' + tmp[tmp.index('\'') + 1:]
-    else:
-        tmp = _CXXFLAGS
-        _CXXFLAGS = _CXXFLAGS.split(' ')[0]
-        config_opts += ' ' + tmp[tmp.index(_CXXFLAGS) + len(_CXXFLAGS):]
-
-    # then read CC, CXX and F77
-    def find_that_is_not_one_of(string, rest):
+    def __init__(self):
+        # define directories
+        self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
+        self.srcdir = join(self.basedir, 'local', 'src')
         try:
-            exceptional_msg = 'ERROR: no suitable \'{string}=some_exe\' found in \'{filename}\'!'.format(string=string,
-                filename=filename)
+            os.mkdir(self.srcdir)
+        except OSError as os_error:
+            if os_error.errno != 17:
+                raise os_error
+
+        self.external_libraries_cfg_filename = join(self.basedir, 'external-libraries.cfg')
+        self.dune_modules_cfg_filename = join(self.basedir, 'dune-modules.cfg')
+        self.demos_cfg_filename = join(self.basedir, 'demos.cfg')
+
+        self.cc = ''
+        self.cxx = ''
+        self.f77 = ''
+        self.cxx_flags = ''
+        self.config_opts_filename = ''
+        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4,18)}
+        self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
+        self._parse_config_opts()
+
+    def _parse_config_opts(self):
+        # get CC from environment
+        if not os.environ.has_key('CC'):
+            raise Exception('ERROR: missing environment variable \'CC\'!')
+        self.config_opts = self._get_config_opts(os.environ['CC'])
+
+        # then read CC, CXX and F77
+        def find_that_is_not_one_of(string, rest):
+            exceptional_msg = 'ERROR: no suitable \'{string}=some_exe\' found in \'{filename}\'!'.format(
+                string=string, filename=self.config_opts_filename)
             #print('config_opts = \'{config_opts}\''.format(config_opts=config_opts))
-            after = config_opts[config_opts.index(string) + len(string):]
+            after = self.config_opts[self.config_opts.index(string) + len(string):]
             #print('after = \'{after}\''.format(after=after))
             if after[0] != '=' or after[1] == ' ':
                 raise Exception(exceptional_msg)
@@ -94,75 +55,104 @@ def _parse_config_opts():
                 raise Exception(exceptional_msg)
             else:
                 return possible
-        except:
-            raise
 
-    _CC = find_that_is_not_one_of('CC', ['CXX', 'F77', 'CXXFLAGS'])
-    _CXX = find_that_is_not_one_of('CXX', ['CC', 'F77', 'CXXFLAGS'])
-    _F77 = find_that_is_not_one_of('F77', ['CC', 'CXX', 'CXXFLAGS'])
+        self.cc = find_that_is_not_one_of('CC', ['CXX', 'F77', 'CXXFLAGS'])
+        self.cxx = find_that_is_not_one_of('CXX', ['CC', 'F77', 'CXXFLAGS'])
+        self.f77 = find_that_is_not_one_of('F77', ['CC', 'CXX', 'CXXFLAGS'])
 
-#    # print summary
-#    print('  CC={CC}'.format(CC=_CC))
-#    print('  CXX={CXX}'.format(CXX=_CXX))
-#    print('  CXXFLAGS=\'{CXXFLAGS}\''.format(CXXFLAGS=_CXXFLAGS))
-#    print('  F77={F77}'.format(F77=_F77))
+    def _get_config_opts(self, env_CC):
+        def _try_opts():
+            _config_opts_filename = 'config.opts.' + os.path.basename(env_CC)
+            for dir_name in (self.basedir, os.path.join(self.basedir, 'opts')):
+                # read corresponding config.opts
+                filename = join(dir_name, _config_opts_filename)
+                try:
+                    return filename, open(filename).read()
+                except IOError:
+                    continue
+            else:
+                raise IOError('ERROR: could not read from \'{}\'!'.format(_config_opts_filename))
 
-    # finished
-    _config_opts_parsed = True
+        self.config_opts_filename, config_opts = _try_opts()
+        config_opts = config_opts.replace('CONFIGURE_FLAGS=', '').replace('"', '').replace('\\', '').replace('\n', ' ')
 
+        # read and remove CXXFLAGS first
+        self.cxx_flags = config_opts.split('CXXFLAGS')[1]
+        config_opts = config_opts.split('CXXFLAGS')[0]
+        if self.cxx_flags[0] != '=':
+            raise Exception('ERROR: no suitable \'CXXFLAGS=\'some_flags\'\' found in \'{}\'!'.format(self.config_opts_filename))
+        self.cxx_flags = self.cxx_flags[1:]
+        if self.cxx_flags[0] == '\'':
+            self.cxx_flags = self.cxx_flags[1:]
+            tmp = self.cxx_flags
+            self.cxx_flags = self.cxx_flags[:self.cxx_flags.index('\'')]
+            config_opts += ' ' + tmp[tmp.index('\'') + 1:]
+        else:
+            tmp = self.cxx_flags
+            self.cxx_flags = self.cxx_flags.split(' ')[0]
+            config_opts += ' ' + tmp[tmp.index(self.cxx_flags) + len(self.cxx_flags):]
+        return config_opts
 
-def CC():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    return _CC
+    def make_env(self):
+        env = os.environ.copy()
+        env['CC'] = self.cc
+        env['CXX'] = self.cxx
+        env['F77'] = self.f77
+        env['CXXFLAGS'] = self.cxx_flags
+        env['basedir'] = self.basedir
+        env['SRCDIR'] = self.srcdir
+        env['BOOST_TOOLSET'] = self.boost_toolsets.get(os.path.basename(self.cc), 'gcc')
+        env['BOOST_ROOT'] = join(self.basedir, 'local')
+        path = join(self.basedir, 'local', 'bin')
+        if 'PATH' in env:
+            path += ':' + env['PATH']
+        env['PATH'] = path
+        ld_library_path = join(self.basedir, 'local', 'lib')
+        if 'LD_LIBRARY_PATH' in env:
+            ld_library_path += ':' + env['LD_LIBRARY_PATH']
+        env['LD_LIBRARY_PATH'] = ld_library_path
+        pkg_config_path = join(self.basedir, 'local', 'lib', 'pkgconfig')
+        if 'PKG_CONFIG_PATH' in env:
+            pkg_config_path += ':' + env['PKG_CONFIG_PATH']
+        env['PKG_CONFIG_PATH'] = pkg_config_path
+        return env
 
-def CXX():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    return _CXX
+def _prep_build_command(verbose, local_config, build_command):
+    build_command = build_command.lstrip().rstrip()
+    if not (build_command[0] == '\'' and build_command[-1] == '\''):
+        if verbose:
+            print('build commands have to be of the form \'command_1\' (is {cmd}), aborting!'.format(cmd=build_command))
 
-def F77():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    return _F77
+    build_command = build_command[1:-1].lstrip().rstrip()
+    build_command = build_command.replace('$BASEDIR', '{basedir}'.format(BASEDIR=local_config.basedir))
+    build_command = build_command.replace('$SRCDIR', '{SRCDIR}'.format(SRCDIR=local_config.srcdir))
+    build_command = build_command.replace('$CXXFLAGS', '\'{CXXFLAGS}\''.format(CXXFLAGS=local_config.cxx_flags))
+    build_command = build_command.replace('$CC', '{CC}'.format(CC=local_config.cc))
+    build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=local_config.cxx))
+    build_command = build_command.replace('$F77', '{F77}'.format(F77=local_config.f77))
+    return build_command
 
-def CXXFLAGS():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    return _CXXFLAGS
+def get_logger(name = __file__):
+    log = logging.getLogger(name)
+    log_lvl = logging.DEBUG if VERBOSE else logging.INFO
+    log.setLevel(log_lvl)
+    return log
 
-def config_opts_filename():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    return _config_opts_filename
-
-BOOST_TOOLSETS = {'gcc-4.{}'.format(i) : 'gcc' for i in range (4,18)}
-BOOST_TOOLSETS.update({ 'icc': 'intel-linux', 'clang': 'clang'})
-
-
-def make_env():
-    if not _config_opts_parsed:
-        _parse_config_opts()
-    env = os.environ
-    env['CC'] = _CC
-    env['CXX'] = _CXX
-    env['F77'] = _F77
-    env['CXXFLAGS'] = _CXXFLAGS 
-    env['BASEDIR'] = _BASEDIR
-    env['SRCDIR'] = _SRCDIR
-    env['BOOST_TOOLSET'] = BOOST_TOOLSETS.get(os.path.basename(_CC), 'gcc')
-    env['BOOST_ROOT'] = join(_BASEDIR, 'local')
-    path = join(_BASEDIR, 'local', 'bin')
-    if 'PATH' in env:
-        path += ':' + env['PATH']
-    env['PATH'] = path
-    ld_library_path = join(_BASEDIR, 'local', 'lib')
-    if 'LD_LIBRARY_PATH' in env:
-        ld_library_path += ':' + env['LD_LIBRARY_PATH']
-    env['LD_LIBRARY_PATH'] = ld_library_path
-    pkg_config_path = join(_BASEDIR, 'local', 'lib', 'pkgconfig')
-    if 'PKG_CONFIG_PATH' in env:
-        pkg_config_path += ':' + env['PKG_CONFIG_PATH']
-    env['PKG_CONFIG_PATH'] = pkg_config_path
-    return env
-
+def process_commands(local_config, commands, cwd):
+    ret = 0
+    log = get_logger('process_commands')
+    for build_command in commands.split(','):
+        build_command = _prep_build_command(VERBOSE, local_config, build_command)
+        log.debug('  calling \'{build_command}\':'.format(build_command=build_command))
+        with open(os.devnull, "w") as devnull:
+            err = sys.stderr if VERBOSE else devnull
+            out = sys.stdout if VERBOSE else devnull
+            ret += subprocess.call(build_command,
+                                  shell=True,
+                                  env=local_config.make_env(),
+                                  cwd=cwd,
+                                  stdout=out,
+                                  stderr=err)
+        if ret != 0:
+            return not bool(ret)
+    return not bool(ret)

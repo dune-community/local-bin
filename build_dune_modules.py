@@ -9,19 +9,29 @@ import os
 
 import common
 
-filename = common.dune_modules_cfg_filename
+log = common.get_logger('dune-modules.build')
+VERBOSE = common.VERBOSE
 
-verbose = True
-if len(sys.argv) > 1:
-    verbose = False
+if __name__ == '__main__':
+    local_config = common.LocalConfig()
+    filename = local_config.dune_modules_cfg_filename
+    # read config opts
+    if VERBOSE:
+        print('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
+    config = ConfigParser.ConfigParser()
+    try:
+        config.readfp(open(filename))
+    except IOError:
+        if VERBOSE:
+            print(': does not exist, calling duncontrol')
+        ret = subprocess.call('./dune-common/bin/dunecontrol --opts={} all'.format(local_config.config_opts_filename),
+                              shell=True,
+                              env=local_config.make_env(),
+                              cwd=local_config.basedir,
+                              stdout=sys.stdout,
+                              stderr=sys.stderr)
+        sys.exit(ret)
 
-
-# read config opts
-if verbose:
-    print('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
-config = ConfigParser.ConfigParser()
-try:
-    config.readfp(open(filename))
     # extract all commands
     commands = []
     short_commands = []
@@ -42,31 +52,34 @@ try:
                     commands.append(('./dune-common/bin/dunecontrol'
                                     + ' --opts={config_opts}'
                                     + ' --only={dune_module}'
-                                    + ' {a_}').format(config_opts=common.config_opts_filename(),
+                                    + ' {a_}').format(config_opts=local_config.config_opts_filename,
                                                     dune_module=dune_module,
                                                     a_=a_))
                     short_commands.append(('{dune_module}:' + ' {a_}').format(dune_module=dune_module,
                                                                             a_=a_))
         else:
             for a_ in all_.split():
-                commands.append('./dune-common/bin/dunecontrol --opts={config_opts} {a_}'.format(config_opts=common.config_opts_filename(),
+                commands.append('./dune-common/bin/dunecontrol --opts={config_opts} {a_}'.format(config_opts=local_config.config_opts_filename,
                                                                                                 a_=a_))
     else:
         commands.append('./dune-common/bin/dunecontrol --opts={config_opts} all'.
-                        format(config_opts=common.config_opts_filename()))
+                        format(config_opts=local_config.config_opts_filename))
     # execute all commands
-    if verbose:
+    if VERBOSE:
         print(', will be calling:')
         for command in commands:
             print('  ' + command)
+    ret = 0
+
+    # TODO use common.process_commands?
     for command, short_command in zip(commands, short_commands):
         ret = 1
-        if verbose:
+        if VERBOSE:
             print('calling ' + command + ':')
             ret = subprocess.call(command,
                                 shell=True,
-                                env=common.make_env(),
-                                cwd=common.BASEDIR(),
+                                env=local_config.make_env(),
+                                cwd=local_config.basedir,
                                 stdout=sys.stdout,
                                 stderr=sys.stderr)
         else:
@@ -75,8 +88,8 @@ try:
             with open(os.devnull, "w") as devnull:
                 ret = subprocess.call(command,
                                     shell=True,
-                                    env=common.make_env(),
-                                    cwd=common.BASEDIR(),
+                                    env=local_config.make_env(),
+                                    cwd=local_config.basedir,
                                     stdout=devnull,
                                     stderr=devnull)
             if ret == 0:
@@ -85,13 +98,5 @@ try:
                 print('failed')
         if ret != 0:
             sys.exit(1)
-except:
-    if verbose:
-        print(': does not exist, calling duncontrol')
-    ret = subprocess.call('./dune-common/bin/dunecontrol --opts={} all'.format(common.config_opts_filename()),
-                          shell=True,
-                          env=common.make_env(),
-                          cwd=common.BASEDIR(),
-                          stdout=sys.stdout,
-                          stderr=sys.stderr)
-sys.exit(ret)
+
+    sys.exit(ret)
