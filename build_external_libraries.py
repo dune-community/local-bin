@@ -16,9 +16,14 @@ def build_library(library, config, local_config):
     no_dir = config.getboolean(library, 'only_build')
     src_dir = local_config.srcdir if no_dir else join(local_config.srcdir, library)
     if not os.path.isdir(src_dir):
-        raise Exception('\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(path=src_dir))
+        raise Exception(
+            '\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(
+
+
+                path=src_dir))
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
+
 # build_library
 
 if __name__ == '__main__':
@@ -42,7 +47,9 @@ if __name__ == '__main__':
     for library in libraries:
         log.info('  ' + library + '... ')
         if not config.has_option(library, 'build'):
-            raise Exception('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{library}]\', aborting!'.format(library=library))
+            raise Exception(
+                'missing \'build=\'list_of\', \'some_commands\'\' in section \'[{library}]\', aborting!'.format(
+                    library=library))
         success = build_library(library, config, local_config)
         if success:
             log.info('done')

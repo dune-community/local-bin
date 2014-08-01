@@ -12,6 +12,7 @@ import common
 log = common.get_logger('demos.build')
 VERBOSE = common.VERBOSE
 
+
 def build_demo(build_commands):
     local_config = common.LocalConfig()
     demo_dir = join(local_config.basedir, 'demos')
@@ -21,6 +22,7 @@ def build_demo(build_commands):
         if os_error.errno != 17:
             raise os_error
     return common.process_commands(local_config, build_commands, demo_dir)
+
 
 if __name__ == '__main__':
     local_config = common.LocalConfig()
@@ -56,7 +58,8 @@ if __name__ == '__main__':
         reports.append(demo + ':')
         if not config.has_option(demo, 'build'):
             if VERBOSE:
-                print('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{demo}]\', aborting!'.format(demo=demo))
+                print('missing \'build=\'list_of\', \'some_commands\'\' in section \'[{demo}]\', aborting!'.format(
+                    demo=demo))
             else:
                 print('failed')
         else:

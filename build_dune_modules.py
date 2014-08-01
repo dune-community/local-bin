@@ -6,7 +6,6 @@ import subprocess
 import sys
 import os
 
-
 import common
 
 log = common.get_logger('dune-modules.build')
@@ -39,28 +38,29 @@ if __name__ == '__main__':
         all_ = 'all'
         if config.has_option('general', 'all'):
             all_ = config.get('general', 'all')
-            assert(len(all_) > 0)
+            assert (len(all_) > 0)
         if config.has_option('general', 'order'):
             dune_modules = config.get('general', 'order')
-            assert(len(dune_modules) > 0)
+            assert (len(dune_modules) > 0)
             for dune_module in dune_modules.split():
                 local_all = all_
                 if config.has_section(dune_module) and config.has_option(dune_module, 'all'):
                     local_all = config.get(dune_module, 'all')
-                    assert(len(local_all) > 0)
+                    assert (len(local_all) > 0)
                 for a_ in local_all.split():
                     commands.append(('./dune-common/bin/dunecontrol'
-                                    + ' --opts={config_opts}'
-                                    + ' --only={dune_module}'
-                                    + ' {a_}').format(config_opts=local_config.config_opts_filename,
-                                                    dune_module=dune_module,
-                                                    a_=a_))
+                                     + ' --opts={config_opts}'
+                                     + ' --only={dune_module}'
+                                     + ' {a_}').format(config_opts=local_config.config_opts_filename,
+                                                       dune_module=dune_module,
+                                                       a_=a_))
                     short_commands.append(('{dune_module}:' + ' {a_}').format(dune_module=dune_module,
-                                                                            a_=a_))
+                                                                              a_=a_))
         else:
             for a_ in all_.split():
-                commands.append('./dune-common/bin/dunecontrol --opts={config_opts} {a_}'.format(config_opts=local_config.config_opts_filename,
-                                                                                                a_=a_))
+                commands.append('./dune-common/bin/dunecontrol --opts={config_opts} {a_}'.format(
+                    config_opts=local_config.config_opts_filename,
+                    a_=a_))
     else:
         commands.append('./dune-common/bin/dunecontrol --opts={config_opts} all'.
                         format(config_opts=local_config.config_opts_filename))
@@ -77,21 +77,21 @@ if __name__ == '__main__':
         if VERBOSE:
             print('calling ' + command + ':')
             ret = subprocess.call(command,
-                                shell=True,
-                                env=local_config.make_env(),
-                                cwd=local_config.basedir,
-                                stdout=sys.stdout,
-                                stderr=sys.stderr)
+                                  shell=True,
+                                  env=local_config.make_env(),
+                                  cwd=local_config.basedir,
+                                  stdout=sys.stdout,
+                                  stderr=sys.stderr)
         else:
             print('  ' + short_command + '... ', end='')
             sys.stdout.flush()
             with open(os.devnull, "w") as devnull:
                 ret = subprocess.call(command,
-                                    shell=True,
-                                    env=local_config.make_env(),
-                                    cwd=local_config.basedir,
-                                    stdout=devnull,
-                                    stderr=devnull)
+                                      shell=True,
+                                      env=local_config.make_env(),
+                                      cwd=local_config.basedir,
+                                      stdout=devnull,
+                                      stderr=devnull)
             if ret == 0:
                 print('done')
             else:

@@ -11,7 +11,6 @@ VERBOSE = len(sys.argv) <= 1
 
 
 class LocalConfig(object):
-
     def __init__(self):
         # define directories
         self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
@@ -31,7 +30,7 @@ class LocalConfig(object):
         self.f77 = ''
         self.cxx_flags = ''
         self.config_opts_filename = ''
-        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4,18)}
+        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4, 18)}
         self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
         self._parse_config_opts()
 
@@ -45,9 +44,9 @@ class LocalConfig(object):
         def find_that_is_not_one_of(string, rest):
             exceptional_msg = 'ERROR: no suitable \'{string}=some_exe\' found in \'{filename}\'!'.format(
                 string=string, filename=self.config_opts_filename)
-            #print('config_opts = \'{config_opts}\''.format(config_opts=config_opts))
+            # print('config_opts = \'{config_opts}\''.format(config_opts=config_opts))
             after = self.config_opts[self.config_opts.index(string) + len(string):]
-            #print('after = \'{after}\''.format(after=after))
+            # print('after = \'{after}\''.format(after=after))
             if after[0] != '=' or after[1] == ' ':
                 raise Exception(exceptional_msg)
             possible = after[1:].split('=')[0].split()[0]
@@ -80,7 +79,8 @@ class LocalConfig(object):
         self.cxx_flags = config_opts.split('CXXFLAGS')[1]
         config_opts = config_opts.split('CXXFLAGS')[0]
         if self.cxx_flags[0] != '=':
-            raise Exception('ERROR: no suitable \'CXXFLAGS=\'some_flags\'\' found in \'{}\'!'.format(self.config_opts_filename))
+            raise Exception(
+                'ERROR: no suitable \'CXXFLAGS=\'some_flags\'\' found in \'{}\'!'.format(self.config_opts_filename))
         self.cxx_flags = self.cxx_flags[1:]
         if self.cxx_flags[0] == '\'':
             self.cxx_flags = self.cxx_flags[1:]
@@ -117,6 +117,7 @@ class LocalConfig(object):
         env['PKG_CONFIG_PATH'] = pkg_config_path
         return env
 
+
 def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.lstrip().rstrip()
     if not (build_command[0] == '\'' and build_command[-1] == '\''):
@@ -132,11 +133,13 @@ def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.replace('$F77', '{F77}'.format(F77=local_config.f77))
     return build_command
 
-def get_logger(name = __file__):
+
+def get_logger(name=__file__):
     log = logging.getLogger(name)
     log_lvl = logging.DEBUG if VERBOSE else logging.INFO
     log.setLevel(log_lvl)
     return log
+
 
 def process_commands(local_config, commands, cwd):
     ret = 0
@@ -148,11 +151,11 @@ def process_commands(local_config, commands, cwd):
             err = sys.stderr if VERBOSE else devnull
             out = sys.stdout if VERBOSE else devnull
             ret += subprocess.call(build_command,
-                                  shell=True,
-                                  env=local_config.make_env(),
-                                  cwd=cwd,
-                                  stdout=out,
-                                  stderr=err)
+                                   shell=True,
+                                   env=local_config.make_env(),
+                                   cwd=cwd,
+                                   stdout=out,
+                                   stderr=err)
         if ret != 0:
             return not bool(ret)
     return not bool(ret)

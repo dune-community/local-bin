@@ -10,12 +10,12 @@ import sys
 import tarfile
 import subprocess
 
-
 import common
 
 
 log = common.get_logger('external_libraries.download')
 VERBOSE = common.VERBOSE
+
 
 def download_library(library, src):
     config = common.LocalConfig()
@@ -36,7 +36,8 @@ def download_library(library, src):
             print('done')
     if VERBOSE:
         print('  unpacking \'{filename}\' '.format(filename=filename.split('/')[-1]), end='')
-    if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith('application/x-bzip'):
+    if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
+            'application/x-bzip'):
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
@@ -75,6 +76,8 @@ def download_library(library, src):
         if VERBOSE:
             print('done')
     return True
+
+
 # def download_library
 
 
@@ -104,18 +107,22 @@ def git_clone_library(library, src):
                                       stdout=devnull,
                                       stderr=devnull)
         return not bool(ret)
+
 # git_clone_library
 
 
 if __name__ == '__main__':
     local_config = common.LocalConfig()
     if VERBOSE:
-        print('reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)), end='')
+        print(
+            'reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)),
+            end='')
     config = ConfigParser.ConfigParser()
     try:
         config.readfp(open(local_config.external_libraries_cfg_filename))
     except:
-        raise Exception('Could not open \'{filename}\' with configparser!'.format(filename=local_config.external_libraries_cfg_filename))
+        raise Exception('Could not open \'{filename}\' with configparser!'.format(
+            filename=local_config.external_libraries_cfg_filename))
     libraries = config.sections()
     if len(libraries) == 0:
         if VERBOSE:
@@ -136,7 +143,7 @@ if __name__ == '__main__':
             print('  ' + library + '... ', end='')
             sys.stdout.flush()
         success = False
-        download=True
+        download = True
         if config.has_option(library, 'only_build'):
             download = not bool(config.get(library, 'only_build'))
         if download:
@@ -146,7 +153,8 @@ if __name__ == '__main__':
                 success = download_library(library, config.get(library, 'src'))
             else:
                 if VERBOSE:
-                    print('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!'.format(library=library))
+                    print('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!'.format(
+                        library=library))
             if not VERBOSE:
                 if success:
                     print('done')
