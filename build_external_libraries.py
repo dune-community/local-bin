@@ -29,7 +29,7 @@ def build_library(library, config, local_config):
 if __name__ == '__main__':
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
-    log.debug('reading \'{}\': ', os.path.basename(filename))
+    log.debug('reading \'{}\': '.format(os.path.basename(filename)))
     config = ConfigParser.SafeConfigParser({'only_build': 'False'})
     if not os.path.isfile(filename):
         raise Exception('Could not open \'{}\' with configparser!'.format(filename))
@@ -59,15 +59,14 @@ if __name__ == '__main__':
             log.info('failed')
             reports.append(library + ': failed')
 
-    if VERBOSE:
-        if len(reports) > 0:
-            log.debug('''
+
+    if len(reports) > 0:
+        log.debug('''
     ================================================
     tried to build the following external libraries:
     ================================================''')
-            for report in reports:
-                log.debug(report)
-    else:
-        if failure > 0:
-            log.critical('  call \'./local/bin/build_external_libraries.py\' manually to examine errors')
+        for report in reports:
+            log.debug(report)
+    if failure > 0:
+        log.critical('  call \'./local/bin/build_external_libraries.py\' manually to examine errors')
     sys.exit(failure)

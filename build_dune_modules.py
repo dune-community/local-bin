@@ -69,34 +69,6 @@ if __name__ == '__main__':
         print(', will be calling:')
         for command in commands:
             print('  ' + command)
-    ret = 0
 
-    # TODO use common.process_commands?
-    for command, short_command in zip(commands, short_commands):
-        ret = 1
-        if VERBOSE:
-            print('calling ' + command + ':')
-            ret = subprocess.call(command,
-                                  shell=True,
-                                  env=local_config.make_env(),
-                                  cwd=local_config.basedir,
-                                  stdout=sys.stdout,
-                                  stderr=sys.stderr)
-        else:
-            print('  ' + short_command + '... ', end='')
-            sys.stdout.flush()
-            with open(os.devnull, "w") as devnull:
-                ret = subprocess.call(command,
-                                      shell=True,
-                                      env=local_config.make_env(),
-                                      cwd=local_config.basedir,
-                                      stdout=devnull,
-                                      stderr=devnull)
-            if ret == 0:
-                print('done')
-            else:
-                print('failed')
-        if ret != 0:
-            sys.exit(1)
-
+    ret = common.process_commands(local_config, commands, local_config.basedir)
     sys.exit(ret)

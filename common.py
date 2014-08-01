@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 VERBOSE = len(sys.argv) <= 1
-
+logging.basicConfig()
 
 class LocalConfig(object):
     def __init__(self):
@@ -42,8 +42,8 @@ class LocalConfig(object):
 
         # then read CC, CXX and F77
         def find_that_is_not_one_of(string, rest):
-            exceptional_msg = 'ERROR: no suitable \'{string}=some_exe\' found in \'{filename}\'!'.format(
-                string=string, filename=self.config_opts_filename)
+            exceptional_msg = 'ERROR: no suitable \'{}=some_exe\' found in \'{}\'!'.format(string,
+                                                                                           self.config_opts_filename)
             # print('config_opts = \'{config_opts}\''.format(config_opts=config_opts))
             after = self.config_opts[self.config_opts.index(string) + len(string):]
             # print('after = \'{after}\''.format(after=after))
@@ -117,6 +117,9 @@ class LocalConfig(object):
         env['PKG_CONFIG_PATH'] = pkg_config_path
         return env
 
+    def command_sep(self):
+        return ';'
+
 
 def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.lstrip().rstrip()
@@ -125,7 +128,7 @@ def _prep_build_command(verbose, local_config, build_command):
             print('build commands have to be of the form \'command_1\' (is {cmd}), aborting!'.format(cmd=build_command))
 
     build_command = build_command[1:-1].lstrip().rstrip()
-    build_command = build_command.replace('$BASEDIR', '{basedir}'.format(BASEDIR=local_config.basedir))
+    build_command = build_command.replace('$BASEDIR', '{BASEDIR}'.format(BASEDIR=local_config.basedir))
     build_command = build_command.replace('$SRCDIR', '{SRCDIR}'.format(SRCDIR=local_config.srcdir))
     build_command = build_command.replace('$CXXFLAGS', '\'{CXXFLAGS}\''.format(CXXFLAGS=local_config.cxx_flags))
     build_command = build_command.replace('$CC', '{CC}'.format(CC=local_config.cc))
@@ -144,7 +147,7 @@ def get_logger(name=__file__):
 def process_commands(local_config, commands, cwd):
     ret = 0
     log = get_logger('process_commands')
-    for build_command in commands.split(','):
+    for build_command in commands.split(local_config.command_sep()):
         build_command = _prep_build_command(VERBOSE, local_config, build_command)
         log.debug('  calling \'{build_command}\':'.format(build_command=build_command))
         with open(os.devnull, "w") as devnull:
