@@ -6,6 +6,7 @@ from os.path import join
 import logging
 import subprocess
 import sys
+import itertools
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
@@ -61,10 +62,10 @@ class LocalConfig(object):
 
     def _get_config_opts(self, env_CC):
         def _try_opts():
-            _config_opts_filename = 'config.opts.' + os.path.basename(env_CC)
-            for dir_name in (self.basedir, os.path.join(self.basedir, 'opts')):
+            cc = os.path.basename(env_CC)
+            for filename in (join(dirname, pref+cc) for dirname,pref in 
+                             itertools.product((self.basedir, os.path.join(self.basedir, 'opts'), ), ('config.opts.', '', ) )):
                 # read corresponding config.opts
-                filename = join(dir_name, _config_opts_filename)
                 try:
                     return filename, open(filename).read()
                 except IOError:
