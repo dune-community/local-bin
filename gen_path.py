@@ -18,3 +18,5 @@ if __name__ == '__main__':
         pathfile.write('export F77={F77}\n'.format(F77=local_config.f77))
         pathfile.write('export PYTHON_VERSION=2.7\n')
         pathfile.write('[ -e $BASEDIR/virtualenv/bin/activate ] && . $BASEDIR/virtualenv/bin/activate\n')
+        pathfile.write('export SIMDB_PATH=$BASEDIR/DATA\n')
+        pathfile.write('export SIMDB_GIT_REPOS=$BASEDIR/configs:$BASEDIR/dune-common:$BASEDIR/dune-fem:$BASEDIR/dune-gdt:$BASEDIR/dune-geometry:$BASEDIR/dune-grid:$BASEDIR/dune-grid-multiscale:$BASEDIR/dune-hdd:$BASEDIR/dune-istl:$BASEDIR/dune-localfunctions:$BASEDIR/dune-pdelab:$BASEDIR/dune-pymor:$BASEDIR/dune-stuff:$BASEDIR/dune-typetree:$BASEDIR/local/bin:$BASEDIR/pymor:$BASEDIR/simdb:$BASEDIR\n')
