@@ -64,15 +64,16 @@ class LocalConfig(object):
         def _try_opts():
             cc = os.path.basename(env_CC)
             search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
+            prefixes = ('config.opts.', '', )
             for filename in (join(dirname, pref+cc) for dirname,pref in 
-                             itertools.product(search_dirs, ('config.opts.', '', ) )):
+                             itertools.product(search_dirs, prefixes)):
                 # read corresponding config.opts
                 try:
                     return filename, open(filename).read()
                 except IOError:
                     continue
             else:
-                raise IOError('ERROR: could not read from \'{}\'!'.format(_config_opts_filename))
+                raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
 
         self.config_opts_filename, config_opts = _try_opts()
         config_opts = config_opts.replace('CONFIGURE_FLAGS=', '').replace('"', '').replace('\\', '').replace('\n', ' ')
