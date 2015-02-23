@@ -63,8 +63,9 @@ class LocalConfig(object):
     def _get_config_opts(self, env_CC):
         def _try_opts():
             cc = os.path.basename(env_CC)
+            search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
             for filename in (join(dirname, pref+cc) for dirname,pref in 
-                             itertools.product((self.basedir, os.path.join(self.basedir, 'opts'), ), ('config.opts.', '', ) )):
+                             itertools.product(search_dirs, ('config.opts.', '', ) )):
                 # read corresponding config.opts
                 try:
                     return filename, open(filename).read()
