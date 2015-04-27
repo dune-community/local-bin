@@ -25,13 +25,13 @@ cygdb
 cython
 gccxml
 gccxml_cc1plus
-ipcluster
-ipcontroller
+ipcluster*
+ipcontroller*
 ipdb
-ipengine
+ipengine*
 iplogger
-iptest
-ipython
+iptest*
+ipython*
 irunner
 pycolor
 pygmentize
@@ -53,3 +53,5 @@ sphinx-build
 sphinx-quickstart
 *alberta*
 stq
+cythonize
+py.test*
