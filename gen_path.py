@@ -18,5 +18,6 @@ if __name__ == '__main__':
         pathfile.write('export F77={F77}\n'.format(F77=local_config.f77))
         pathfile.write('export PYTHON_VERSION=2.7\n')
         pathfile.write('[ -e $BASEDIR/local/bin/activate ] && . $BASEDIR/local/bin/activate\n')
+        pathfile.write('export OMP_NUM_THREADS=1\n')
         pathfile.write('export SIMDB_PATH=$BASEDIR/DATA\n')
         pathfile.write('export QUEUE_DIRECTORY=$BASEDIR/QUEUE\n')
