@@ -21,3 +21,11 @@ if __name__ == '__main__':
         pathfile.write('export OMP_NUM_THREADS=1\n')
         pathfile.write('export SIMDB_PATH=$BASEDIR/DATA\n')
         pathfile.write('export QUEUE_DIRECTORY=$BASEDIR/QUEUE\n')
+        pathfile.write('export SIMDB_GIT_REPOS=')
+        for submodule in ('local/bin', 'config.opts', 'scripts', 'local/src/dune-common', 'local/src/dune-geometry',
+                          'local/src/dune-grid', 'local/src/dune-istl', 'local/src/dune-localfunctions', 'local/src/dune-functions',
+                          'local/src/dune-typetree', 'local/src/dune-pdelab', 'local/src/dune-stuff', 'local/src/dune-pymor',
+                          'local/src/dune-gdt', 'local/src/dune-hdd', 'local/src/pymor', 'local/src/simdb',
+                          'local/src/dune-spgrid'):
+            pathfile.write('$BASEDIR/{}:'.format(submodule))
+        pathfile.write('\n')
