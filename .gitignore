@@ -55,3 +55,4 @@ sphinx-quickstart
 stq
 cythonize
 py.test*
+jsonschema
