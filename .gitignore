@@ -56,3 +56,4 @@ stq
 cythonize
 py.test*
 jsonschema
+pybabel
