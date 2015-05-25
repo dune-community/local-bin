@@ -19,7 +19,7 @@ if __name__ == '__main__':
         pathfile.write('export PYTHON_VERSION=2.7\n')
         pathfile.write('[ -e $BASEDIR/local/bin/activate ] && . $BASEDIR/local/bin/activate\n')
         pathfile.write('export OMP_NUM_THREADS=1\n')
-        pathfile.write('export SIMDB_PATH=$BASEDIR/DATA\n')
+        # pathfile.write('export SIMDB_PATH=$BASEDIR/DATA\n')
         pathfile.write('export QUEUE_DIRECTORY=$BASEDIR/QUEUE\n')
         pathfile.write('export SIMDB_GIT_REPOS=$BASEDIR:')
         for submodule in ('local/bin', 'config.opts', 'scripts', 'local/src/dune-common', 'local/src/dune-geometry',
