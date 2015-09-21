@@ -17,4 +17,4 @@ if __name__ == '__main__':
         pathfile.write('export CXX={CXX}\n'.format(CXX=local_config.cxx))
         pathfile.write('export F77={F77}\n'.format(F77=local_config.f77))
         pathfile.write('export PYTHON_VERSION=2.7\n')
-        pathfile.write('[ -e $BASEDIR/virtualenv/bin/activate ] && . $BASEDIR/virtualenv/bin/activate\n')
+        pathfile.write('[ -e $BASEDIR/local/bin/activate ] && . $BASEDIR/local/bin/activate\n')
