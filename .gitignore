@@ -57,3 +57,4 @@ cythonize
 py.test*
 jsonschema
 pybabel
+wheel
