@@ -43,7 +43,7 @@ class LocalConfig(object):
         # get CC from environment
         if not os.environ.has_key('CC'):
             raise Exception('ERROR: missing environment variable \'CC\'!')
-        self.config_opts = self._get_config_opts(os.environ['CC'])
+        self.config_opts = self._get_config_opts(os.environ)
 
         # then read CC, CXX and F77
         def find_that_is_not_one_of(string, rest):
@@ -64,9 +64,9 @@ class LocalConfig(object):
         self.cxx = find_that_is_not_one_of('CXX', ['CC', 'F77', 'CXXFLAGS'])
         self.f77 = find_that_is_not_one_of('F77', ['CC', 'CXX', 'CXXFLAGS'])
 
-    def _get_config_opts(self, env_CC):
+    def _get_config_opts(self, env):
         def _try_opts():
-            cc = os.path.basename(env_CC)
+            cc = os.path.basename(env['CC'])
             search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
             prefixes = ('config.opts.', '', )
             for filename in (join(dirname, pref+cc) for dirname,pref in 
@@ -79,7 +79,10 @@ class LocalConfig(object):
             else:
                 raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
 
-        self.config_opts_filename, config_opts = _try_opts()
+        try:
+            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS']).read()
+        except (IOError, KeyError):
+            self.config_opts_filename, config_opts = _try_opts()
         config_opts = config_opts.replace('CONFIGURE_FLAGS=', '').replace('"', '').replace('\\', '').replace('\n', ' ')
 
         # read and remove CXXFLAGS first
