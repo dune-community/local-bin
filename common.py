@@ -7,6 +7,7 @@ import logging
 import subprocess
 import sys
 import itertools
+from string import Template
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
@@ -15,11 +16,12 @@ class LocalConfig(object):
     def __init__(self):
         # define directories
         self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
-        self.srcdir = join(self.basedir, 'local', 'src')
+        self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
+        self.srcdir = join(self.install_prefix, 'src')
         try:
-            os.mkdir(self.srcdir)
+            os.makedirs(self.srcdir)
         except OSError as os_error:
-            if os_error.errno != 17:
+            if os_error.errno != os.errno.EEXIST:
                 raise os_error
 
         self.external_libraries_cfg_filename = join(self.basedir, 'external-libraries.cfg')
@@ -31,7 +33,9 @@ class LocalConfig(object):
         self.f77 = ''
         self.cxx_flags = ''
         self.config_opts_filename = ''
-        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4, 18)}
+        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4, 9)}
+        self.boost_toolsets.update({'gcc-5.{}'.format(i): 'gcc' for i in range(1, 9)})
+        self.boost_toolsets.update({'gcc-6.{}'.format(i): 'gcc' for i in range(1, 9)})
         self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
         self._parse_config_opts()
 
@@ -103,18 +107,20 @@ class LocalConfig(object):
         env['F77'] = self.f77
         env['CXXFLAGS'] = self.cxx_flags
         env['basedir'] = self.basedir
+        env['BASEDIR'] = self.basedir
         env['SRCDIR'] = self.srcdir
+        env['INSTALL_PREFIX'] = self.install_prefix
         env['BOOST_TOOLSET'] = self.boost_toolsets.get(os.path.basename(self.cc), 'gcc')
-        env['BOOST_ROOT'] = join(self.basedir, 'local')
-        path = join(self.basedir, 'local', 'bin')
+        env['BOOST_ROOT'] = env['INSTALL_PREFIX']
+        path = join(self.install_prefix, 'bin')
         if 'PATH' in env:
             path += ':' + env['PATH']
         env['PATH'] = path
-        ld_library_path = join(self.basedir, 'local', 'lib')
+        ld_library_path = join(self.install_prefix, 'lib')
         if 'LD_LIBRARY_PATH' in env:
             ld_library_path += ':' + env['LD_LIBRARY_PATH']
         env['LD_LIBRARY_PATH'] = ld_library_path
-        pkg_config_path = join(self.basedir, 'local', 'lib', 'pkgconfig')
+        pkg_config_path = join(self.install_prefix, 'lib', 'pkgconfig')
         if 'PKG_CONFIG_PATH' in env:
             pkg_config_path += ':' + env['PKG_CONFIG_PATH']
         env['PKG_CONFIG_PATH'] = pkg_config_path
@@ -129,14 +135,9 @@ def _prep_build_command(verbose, local_config, build_command):
     if not (build_command[0] == '\'' and build_command[-1] == '\''):
         if verbose:
             print('build commands have to be of the form \'command_1\' (is {cmd}), aborting!'.format(cmd=build_command))
-
-    build_command = build_command[1:-1].lstrip().rstrip()
-    build_command = build_command.replace('$BASEDIR', '{BASEDIR}'.format(BASEDIR=local_config.basedir))
-    build_command = build_command.replace('$SRCDIR', '{SRCDIR}'.format(SRCDIR=local_config.srcdir))
-    build_command = build_command.replace('$CXXFLAGS', '\'{CXXFLAGS}\''.format(CXXFLAGS=local_config.cxx_flags))
-    build_command = build_command.replace('$CC', '{CC}'.format(CC=local_config.cc))
-    build_command = build_command.replace('$CXX', '{CXX}'.format(CXX=local_config.cxx))
-    build_command = build_command.replace('$F77', '{F77}'.format(F77=local_config.f77))
+    build_command = Template(build_command[1:-1].lstrip().rstrip())
+    subst = local_config.make_env()
+    build_command = build_command.substitute(subst)
     return build_command
 
 
