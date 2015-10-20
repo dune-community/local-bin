@@ -8,7 +8,8 @@ import common as common
 if __name__ == '__main__':
     local_config = common.LocalConfig()
     with open(join(local_config.basedir, 'PATH.sh'), 'w') as pathfile:
-        pathfile.write('export INSTALL_PREFIX={}\n'.format(local_config.basedir))
+        pathfile.write('export BASEDIR={}\n'.format(local_config.basedir))
+        pathfile.write('export INSTALL_PREFIX={}\n'.format(local_config.install_prefix))
         pathfile.write('export PATH=${INSTALL_PREFIX}/bin:$PATH\n')
         pathfile.write('export LD_LIBRARY_PATH=${INSTALL_PREFIX}/lib64:${INSTALL_PREFIX}/lib:$LD_LIBRARY_PATH\n')
         pathfile.write(
