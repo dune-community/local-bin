@@ -80,7 +80,7 @@ class LocalConfig(object):
 
         def _extract_from(parts, flag_arg):
             configure_flags = parts[i + 2]
-            for arg in [f for f in shlex.split(configure_flags, posix=True) if f != '\n']:
+            for arg in [f.strip() for f in shlex.split(configure_flags, posix=True) if f != '\n']:
                 if arg.startswith(flag_arg):
                     self.cxx_flags = shlex.split(arg[2:], posix=True)[2].join(' ')
                     return ' '.join(configure_flags)
