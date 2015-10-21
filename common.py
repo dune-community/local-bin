@@ -8,6 +8,8 @@ import subprocess
 import sys
 import itertools
 from string import Template
+from pprint import pprint
+import shlex
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
@@ -33,9 +35,7 @@ class LocalConfig(object):
         self.f77 = ''
         self.cxx_flags = ''
         self.config_opts_filename = ''
-        self.boost_toolsets = {'gcc-4.{}'.format(i): 'gcc' for i in range(4, 9)}
-        self.boost_toolsets.update({'gcc-5.{}'.format(i): 'gcc' for i in range(1, 9)})
-        self.boost_toolsets.update({'gcc-6.{}'.format(i): 'gcc' for i in range(1, 9)})
+        self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i,j in itertools.product(range(4,7), range(10))}
         self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
         self._parse_config_opts()
 
@@ -46,62 +46,55 @@ class LocalConfig(object):
         self.config_opts = self._get_config_opts(os.environ)
 
         # then read CC, CXX and F77
-        def find_that_is_not_one_of(string, rest):
-            exceptional_msg = 'ERROR: no suitable \'{}=some_exe\' found in \'{}\'!'.format(string,
-                                                                                           self.config_opts_filename)
-            # print('config_opts = \'{config_opts}\''.format(config_opts=config_opts))
-            after = self.config_opts[self.config_opts.index(string) + len(string):]
-            # print('after = \'{after}\''.format(after=after))
-            if after[0] != '=' or after[1] == ' ':
-                raise Exception(exceptional_msg)
-            possible = after[1:].split('=')[0].split()[0]
-            if possible in rest:
-                raise Exception(exceptional_msg)
-            else:
-                return possible
+        def find_opt(string, default):
+            cc = os.environ.get(string, default)
+            tokens = list(shlex.shlex(self.config_opts, posix=True))
+            for i, possible in enumerate(tokens):
+                if possible == string:
+                    return tokens[i+2]
+            return cc
 
-        self.cc = find_that_is_not_one_of('CC', ['CXX', 'F77', 'CXXFLAGS'])
-        self.cxx = find_that_is_not_one_of('CXX', ['CC', 'F77', 'CXXFLAGS'])
-        self.f77 = find_that_is_not_one_of('F77', ['CC', 'CXX', 'CXXFLAGS'])
+        self.cc = find_opt('CC', default='gcc')
+        self.cxx = find_opt('CXX', default='g++')
+        self.f77 = find_opt('F77', default='gfortran')
+
+    def _try_opts(self, env):
+        cc = os.path.basename(env['CC'])
+        search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
+        prefixes = ('config.opts.', '',)
+        for filename in (join(dirname, pref + cc) for dirname, pref in
+                         itertools.product(search_dirs, prefixes)):
+            try:
+                return filename, open(filename).read()
+            except IOError:
+                continue
+        else:
+            raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
+
 
     def _get_config_opts(self, env):
-        def _try_opts():
-            cc = os.path.basename(env['CC'])
-            search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
-            prefixes = ('config.opts.', '', )
-            for filename in (join(dirname, pref+cc) for dirname,pref in 
-                             itertools.product(search_dirs, prefixes)):
-                # read corresponding config.opts
-                try:
-                    return filename, open(filename).read()
-                except IOError:
-                    continue
-            else:
-                raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
-
         try:
             self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS']).read()
         except (IOError, KeyError):
-            self.config_opts_filename, config_opts = _try_opts()
-        config_opts = config_opts.replace('CONFIGURE_FLAGS=', '').replace('"', '').replace('\\', '').replace('\n', ' ')
+            self.config_opts_filename, config_opts = self._try_opts(env)
 
-        # read and remove CXXFLAGS first
-        self.cxx_flags = config_opts.split('CXXFLAGS')[1]
-        config_opts = config_opts.split('CXXFLAGS')[0]
-        if self.cxx_flags[0] != '=':
-            raise Exception(
-                'ERROR: no suitable \'CXXFLAGS=\'some_flags\'\' found in \'{}\'!'.format(self.config_opts_filename))
-        self.cxx_flags = self.cxx_flags[1:]
-        if self.cxx_flags[0] == '\'':
-            self.cxx_flags = self.cxx_flags[1:]
-            tmp = self.cxx_flags
-            self.cxx_flags = self.cxx_flags[:self.cxx_flags.index('\'')]
-            config_opts += ' ' + tmp[tmp.index('\'') + 1:]
-        else:
-            tmp = self.cxx_flags
-            self.cxx_flags = self.cxx_flags.split(' ')[0]
-            config_opts += ' ' + tmp[tmp.index(self.cxx_flags) + len(self.cxx_flags):]
-        return config_opts
+        def _extract_from(parts, flag_arg):
+            configure_flags = parts[i + 2]
+            for arg in [f for f in shlex.split(configure_flags, posix=True) if f != '\n']:
+                if arg.startswith(flag_arg):
+                    self.cxx_flags = shlex.split(arg[2:], posix=True)[2].join(' ')
+                    return ' '.join(configure_flags)
+
+        parts = list(shlex.shlex(config_opts, posix=True))
+        for i, token in enumerate(parts):
+            if token == 'CONFIGURE_FLAGS':
+                flag_arg = 'CXXFLAGS'
+                return _extract_from(parts, flag_arg)
+            if token == 'CMAKE_FLAGS':
+                flag_arg = '-DCMAKE_CXX_FLAGS'
+                return _extract_from(parts, flag_arg)
+        raise Exception('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(self.config_opts_filename))
+
 
     def make_env(self):
         env = os.environ.copy()
