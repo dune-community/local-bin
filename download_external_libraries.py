@@ -18,7 +18,7 @@ VERBOSE = common.VERBOSE
 
 
 def download_library(library, src):
-    config = common.LocalConfig()
+    config = common.LocalConfig(allow_for_broken_config_opts=True)
     if VERBOSE:
         print('  downloading from \'{src}\'... '.format(src=src), end='')
     sys.stdout.flush()
@@ -82,7 +82,7 @@ def download_library(library, src):
 
 
 def git_clone_library(library, src):
-    local_config = common.LocalConfig()
+    local_config = common.LocalConfig(allow_for_broken_config_opts=True)
     if VERBOSE:
         print('  cloning \'{src}\':'.format(src=src))
     sys.stdout.flush()
@@ -112,7 +112,7 @@ def git_clone_library(library, src):
 
 
 if __name__ == '__main__':
-    local_config = common.LocalConfig()
+    local_config = common.LocalConfig(allow_for_broken_config_opts=True)
     if VERBOSE:
         print(
             'reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)),

@@ -15,7 +15,7 @@ VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
 
 class LocalConfig(object):
-    def __init__(self):
+    def __init__(self, allow_for_broken_config_opts=False):
         # define directories
         self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
         self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
@@ -37,7 +37,13 @@ class LocalConfig(object):
         self.config_opts_filename = ''
         self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i,j in itertools.product(range(4,7), range(10))}
         self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
-        self._parse_config_opts()
+        if allow_for_broken_config_opts:
+            try:
+                self._parse_config_opts()
+            except:
+                pass
+        else:
+            self._parse_config_opts()
 
     def _parse_config_opts(self):
         # get CC from environment
