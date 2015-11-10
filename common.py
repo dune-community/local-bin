@@ -41,8 +41,6 @@ class LocalConfig(object):
 
     def _parse_config_opts(self):
         # get CC from environment
-        if not os.environ.has_key('CC'):
-            raise Exception('ERROR: missing environment variable \'CC\'!')
         self.config_opts = self._get_config_opts(os.environ)
 
         # then read CC, CXX and F77
@@ -59,6 +57,16 @@ class LocalConfig(object):
         self.f77 = find_opt('F77', default='gfortran')
 
     def _try_opts(self, env):
+        if 'OPTS' in env:
+            for filename in (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])):
+                try:
+                    return filename, open(filename).read()
+                except IOError:
+                    continue
+            raise Exception('You explicitely specified OPTS={}, but neither {} nor {} exist!'.format(
+                join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])))
+        if not 'CC' in env:
+            raise Exception('You either have to set OPTS or CC in order to specify a config.opts file!')
         cc = os.path.basename(env['CC'])
         search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
         prefixes = ('config.opts.', '',)
