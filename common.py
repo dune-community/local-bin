@@ -147,7 +147,7 @@ def _prep_build_command(verbose, local_config, build_command):
             print('build commands have to be of the form \'command_1\' (is {cmd}), aborting!'.format(cmd=build_command))
     build_command = Template(build_command[1:-1].lstrip().rstrip())
     subst = local_config.make_env()
-    build_command = build_command.substitute(subst)
+    build_command = build_command.safe_substitute(subst)
     return build_command
 
 
