@@ -96,7 +96,7 @@ class LocalConfig(object):
             configure_flags = parts[i + 2]
             for arg in [f.strip() for f in shlex.split(configure_flags, posix=True) if f != '\n']:
                 if arg.startswith(flag_arg):
-                    self.cxx_flags = shlex.split(arg[2:], posix=True)[2].join(' ')
+                    self.cxx_flags = '\'' + ' '.join(shlex.split(arg[len(flag_arg):].strip().strip('='), posix=True)) + '\''
                     return ' '.join(configure_flags)
 
         parts = list(shlex.shlex(config_opts, posix=True))
