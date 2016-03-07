@@ -51,12 +51,14 @@ class LocalConfig(object):
 
         # then read CC, CXX and F77
         def find_opt(string, default):
-            cc = os.environ.get(string, default)
-            tokens = list(shlex.shlex(self.config_opts, posix=True))
-            for i, possible in enumerate(tokens):
-                if possible == string:
-                    return tokens[i+2]
-            return cc
+            cc = os.environ.get(string)
+            if cc is not None:
+                return cc
+            for i, possible in enumerate(self.config_opts):
+                possible = list(shlex.shlex(possible))
+                if possible[0] == string and possible[1] == '=':
+                    return possible[2]
+            return default
 
         self.cc = find_opt('CC', default='gcc')
         self.cxx = find_opt('CXX', default='g++')
@@ -94,10 +96,11 @@ class LocalConfig(object):
 
         def _extract_from(parts, flag_arg):
             configure_flags = parts[i + 2]
-            for arg in [f.strip() for f in shlex.split(configure_flags, posix=True) if f != '\n']:
+            configure_flags = [f.strip() for f in shlex.split(configure_flags, posix=True) if f != '\n']
+            for arg in configure_flags:
                 if arg.startswith(flag_arg):
                     self.cxx_flags = '\'' + ' '.join(shlex.split(arg[len(flag_arg):].strip().strip('='), posix=True)) + '\''
-                    return ' '.join(configure_flags)
+                    return configure_flags
 
         parts = list(shlex.shlex(config_opts, posix=True))
         for i, token in enumerate(parts):
