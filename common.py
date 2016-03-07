@@ -57,7 +57,7 @@ class LocalConfig(object):
             for i, possible in enumerate(self.config_opts):
                 possible = list(shlex.shlex(possible))
                 if possible[0] == string and possible[1] == '=':
-                    return possible[2]
+                    return ''.join(possible[2:])
             return default
 
         self.cc = find_opt('CC', default='gcc')
