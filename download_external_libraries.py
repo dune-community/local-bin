@@ -14,7 +14,6 @@ import common
 
 
 log = common.get_logger('external_libraries.download')
-VERBOSE = common.VERBOSE
 
 
 def download_library(library, src):
@@ -72,27 +71,17 @@ def git_clone_library(library, src):
         log.debug('not necessary (already exists)')
         return True
     else:
-        if VERBOSE:
+        with open(os.devnull, "w") as devnull:
             ret = subprocess.call('git clone ' + src + ' ' + library,
                                   shell=True,
                                   env=local_config.make_env(),
                                   cwd=local_config.srcdir,
-                                  stdout=sys.stdout,
-                                  stderr=sys.stderr)
-        else:
-            with open(os.devnull, "w") as devnull:
-                ret = subprocess.call('git clone ' + src + ' ' + library,
-                                      shell=True,
-                                      env=local_config.make_env(),
-                                      cwd=local_config.srcdir,
-                                      stdout=devnull,
-                                      stderr=devnull)
+                                  stdout=sys.stdout if common.VERBOSE else devnull,
+                                  stderr=sys.stderr if common.VERBOSE else devnull)
         return not bool(ret)
 
-# git_clone_library
 
-
-if __name__ == '__main__':
+def download_all():
     local_config = common.LocalConfig(allow_for_broken_config_opts=True)
     log.debug(
             'reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)),
@@ -112,11 +101,8 @@ if __name__ == '__main__':
 
     failures = 0
     for library in libraries:
-        if VERBOSE:
-            log.debug(library + ':')
-        else:
-            log.info('  ' + library + '... ', end='')
-            sys.stdout.flush()
+        log.info('  ' + library + '... ', end='')
+        log.debug('')
         success = False
         download = True
         if config.has_option(library, 'only_build'):
@@ -129,7 +115,7 @@ if __name__ == '__main__':
             else:
                 log.debug('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!'.format(
                         library=library))
-            if not VERBOSE:
+            if not common.VERBOSE:
                 if success:
                     log.info('done')
                 else:
@@ -137,7 +123,9 @@ if __name__ == '__main__':
                     log.info('failed')
         else:
             log.info('nothing to do, since \'only_build\' is True')
-    if not VERBOSE:
-        if failures > 0:
-            log.error('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
+    if failures > 0:
+        log.error('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
     sys.exit(failures)
+
+if __name__ == '__main__':
+    download_all()

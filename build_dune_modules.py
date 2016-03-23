@@ -8,10 +8,9 @@ import os
 
 import common
 
-log = common.get_logger('dune-modules.build')
-VERBOSE = common.VERBOSE
 
-if __name__ == '__main__':
+def build_modules():
+    log = common.get_logger('dune-modules.build')
     DCNTRL = './dune-common/bin/dunecontrol --use-cmake'
     local_config = common.LocalConfig()
     filename = local_config.dune_modules_cfg_filename
@@ -66,3 +65,6 @@ if __name__ == '__main__':
     log.debug('  '.join(commands))
     ret = common.process_commands(local_config, commands, local_config.basedir)
     sys.exit(ret)
+
+if __name__ == '__main__':
+    build_modules()

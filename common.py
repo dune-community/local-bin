@@ -66,13 +66,13 @@ class LocalConfig(object):
 
     def _try_opts(self, env):
         if 'OPTS' in env:
-            for filename in (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])):
+            possibles = (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS']))
+            for filename in possibles:
                 try:
                     return filename, open(filename).read()
                 except IOError:
                     continue
-            raise Exception('You explicitely specified OPTS={}, but neither {} nor {} exist!'.format(
-                join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])))
+            raise Exception('Environment defined OPTS not discovered in {}'.format(possibles))
         if not 'CC' in env:
             raise Exception('You either have to set OPTS or CC in order to specify a config.opts file!')
         cc = os.path.basename(env['CC'])
