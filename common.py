@@ -17,9 +17,9 @@ VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
 
 class LocalConfig(object):
-    def __init__(self, allow_for_broken_config_opts=False):
+    def __init__(self, allow_for_broken_config_opts=False, basedir=None):
         # define directories
-        self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
+        self.basedir = basedir or os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
         self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
         self.srcdir = join(self.install_prefix, 'src')
         try:
@@ -58,7 +58,7 @@ class LocalConfig(object):
                 return cc
             for i, possible in enumerate(self.config_opts):
                 possible = list(shlex.shlex(possible))
-                if possible[0] == string and possible[1] == '=':
+                if len(possible) > 1 and possible[0] == string and possible[1] == '=':
                     return ''.join(possible[2:])
             return default
 
