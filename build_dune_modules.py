@@ -16,14 +16,12 @@ if __name__ == '__main__':
     local_config = common.LocalConfig()
     filename = local_config.dune_modules_cfg_filename
     # read config opts
-    if VERBOSE:
-        print('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
+    log.debug('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
     config = ConfigParser.ConfigParser()
     try:
         config.readfp(open(filename))
     except IOError:
-        if VERBOSE:
-            print(': does not exist, calling duncontrol')
+        log.debug(': does not exist, calling duncontrol')
         ret = subprocess.call('{} --opts={} all'.format(DCNTRL, local_config.config_opts_filename),
                               shell=True,
                               env=local_config.make_env(),
@@ -64,10 +62,7 @@ if __name__ == '__main__':
         commands.append('{} --opts={config_opts} all'.
                         format(DCNTRL, config_opts=local_config.config_opts_filename))
     # execute all commands
-    if VERBOSE:
-        print(', will be calling:')
-        for command in commands:
-            print('  ' + command)
-
+    log.debug(', will be calling:')
+    log.debug('  '.join(commands))
     ret = common.process_commands(local_config, commands, local_config.basedir)
     sys.exit(ret)
