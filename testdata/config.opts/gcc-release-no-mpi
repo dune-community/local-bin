@@ -1,0 +1,17 @@
+# This file is part of the dune-config-opts project:
+#   http://users.dune-project.org/projects/dune-config-opts
+# Copyright holders: Rene Milk, Felix Schindler
+# License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
+
+CONFIGURE_FLAGS=" \
+  CC=gcc \
+  CXX=g++ \
+  F77=gfortran \
+  CXXFLAGS='-std=c++11 -Os -fPIC -fno-strict-aliasing -w -DDUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS=1 -DDNDEBUG -DNDEBUG -DENABLE_MPI=0 -DENABLE_PARMETIS=0 -DDUNE_HDD_LINEARELLIPTIC_DISCRETIZATIONS_BASE_DISABLE_CACHING=1' \
+  --enable-experimental-grid-extensions \
+  --disable-documentation \
+  --disable-parallel \
+  INKSCAPE=no \
+"
+CMAKE_FLAGS="-Wno-dev -DSTDTHREAD_LINK_FLAGS='-lpthread -pthread' -DUG_DIR=../local/lib/cmake/ug/"
+BUILDDIR=build-gcc-release-no-mpi

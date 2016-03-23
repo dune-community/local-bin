@@ -1,0 +1,6 @@
+CONFIGURE_FLAGS="CXX=clang++ CC=clang F77=gfortran CXXFLAGS='-DDEBUG -g3 -ggdb -std=c++11  -O0' \
+  --enable-parallel \
+  --disable-documentation  INKSCAPE=no"
+CMAKE_FLAGS=" -Wno-dev -DCMAKE_BUILD_TYPE=DEBUG"
+MAKE_FLAGS="-- -j4 -l4"
+BUILDDIR=/home/r_milk01/projekte/uni/dune/build/dune-multiscale/clang-debug
