@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import os
+import pytest
 from os.path import join
 import logging
 import subprocess
@@ -10,6 +11,7 @@ import itertools
 from string import Template
 from pprint import pprint
 import shlex
+import glob
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
@@ -179,3 +181,17 @@ def process_commands(local_config, commands, cwd):
         if ret != 0:
             return not bool(ret)
     return not bool(ret)
+
+TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata')
+
+@pytest.fixture(params=[os.path.join(root, fn)
+                        for root,_, files in os.walk(os.path.join(TESTDATA_DIR, 'config.opts')) for fn in files])
+def config_filename(request):
+    return request.param
+
+def test_configs(config_filename):
+    os.environ['OPTS'] = config_filename
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+    cfg = LocalConfig(basedir=os.path.dirname(config_filename))
+    assert cfg.config_opts_filename == config_filename
+
