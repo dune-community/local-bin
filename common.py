@@ -76,9 +76,9 @@ class LocalConfig(object):
                     return filename, open(filename).read()
                 except IOError:
                     continue
-            raise Exception('Environment defined OPTS not discovered in {}'.format(possibles))
+            raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
         if not 'CC' in env:
-            raise Exception('You either have to set OPTS or CC in order to specify a config.opts file!')
+            raise RuntimeError('You either have to set OPTS or CC in order to specify a config.opts file!')
         cc = os.path.basename(env['CC'])
         search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
         prefixes = ('config.opts.', '',)
@@ -114,7 +114,8 @@ class LocalConfig(object):
             if token == 'CMAKE_FLAGS':
                 flag_arg = '-DCMAKE_CXX_FLAGS'
                 return _extract_from(parts, flag_arg)
-        raise Exception('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(self.config_opts_filename))
+        raise RuntimeError('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(
+                self.config_opts_filename))
 
 
     def make_env(self):
