@@ -19,7 +19,6 @@ log = common.get_logger('external_libraries.download')
 def download_library(library, src):
     config = common.LocalConfig(allow_for_broken_config_opts=True)
     log.debug('  downloading from \'{src}\'... '.format(src=src), end='')
-    sys.stdout.flush()
     dest = join(config.srcdir, os.path.basename(src))
     filename = join(config.srcdir, dest)
     if os.path.exists(filename):
@@ -55,7 +54,6 @@ def download_library(library, src):
         log.debug('file is of wrong type (is \'{is_type}\'), aborting!'.format(is_type=filetype))
         return False
     log.debug('  moving \'{src}\' to \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end='')
-    sys.stdout.flush()
     if os.path.exists(join(config.srcdir, library)):
         log.debug('not necessary (already exists)')
     else:
@@ -66,7 +64,6 @@ def download_library(library, src):
 def git_clone_library(library, src):
     local_config = common.LocalConfig(allow_for_broken_config_opts=True)
     log.debug('  cloning \'{src}\':'.format(src=src))
-    sys.stdout.flush()
     if os.path.exists(join(local_config.srcdir, library)):
         log.debug('not necessary (already exists)')
         return True

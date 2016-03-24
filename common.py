@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 import pytest
+import types
 from os.path import join
 import logging
 import subprocess
@@ -155,11 +156,51 @@ def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.safe_substitute(subst)
     return build_command
 
+class LineEndStreamhandler(logging.StreamHandler):
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            if not hasattr(types, "UnicodeType"): #if no unicode support...
+                self.stream.write(msg)
+            else:
+                try:
+                    if getattr(self.stream, 'encoding', None) is not None:
+                        self.stream.write(msg.encode(self.stream.encoding))
+                    else:
+                        self.stream.write(msg)
+                except UnicodeError:
+                    self.stream.write(msg.encode("UTF-8"))
+            try:
+                end = record.end
+            except AttributeError:
+                end = os.linesep
+            self.stream.write(end)
+            self.flush()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
 
 def get_logger(name=__file__):
     log = logging.getLogger(name)
     log_lvl = logging.DEBUG if VERBOSE else logging.INFO
+
+    handler = LineEndStreamhandler(stream=sys.stdout)
+    myFormatter = logging.Formatter('%(message)s')
+    handler.setFormatter(myFormatter)
+    log.handlers = [handler]
     log.setLevel(log_lvl)
+    #monkey patch to allow passing end=str as a kwarg like the print_function does
+    old_log = log._log
+    def mlog(self, msg, *args, **kwargs):
+        if 'end' in kwargs:
+            kwargs['extra'] = {'end': kwargs['end']}
+            del kwargs['end']
+        old_log(msg, *args, **kwargs)
+    log._log = types.MethodType(mlog, log)
+    log.propagate = False
     return log
 
 
