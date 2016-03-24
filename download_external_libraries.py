@@ -1,7 +1,10 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from __future__ import print_function
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 import pytest
 import urllib
 import os
@@ -84,7 +87,7 @@ def download_all():
     log.debug(
             'reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)),
             end='')
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     try:
         config.readfp(open(local_config.external_libraries_cfg_filename))
     except:

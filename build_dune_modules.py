@@ -1,7 +1,10 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from __future__ import print_function
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 import subprocess
 import sys
 import os
@@ -16,7 +19,7 @@ def build_modules():
     filename = local_config.dune_modules_cfg_filename
     # read config opts
     log.debug('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     try:
         config.readfp(open(filename))
     except IOError:

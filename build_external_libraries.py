@@ -1,8 +1,11 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from __future__ import with_statement
 
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 import os
 from os.path import join
 import sys
@@ -30,7 +33,7 @@ if __name__ == '__main__':
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
     log.debug('reading \'{}\': '.format(os.path.basename(filename)))
-    config = ConfigParser.SafeConfigParser({'only_build': 'False'})
+    config = configparser.SafeConfigParser({'only_build': 'False'})
     if not os.path.isfile(filename):
         raise Exception('Could not open \'{}\' with configparser!'.format(filename))
     config.read(filename)
