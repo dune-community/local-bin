@@ -16,6 +16,8 @@ import glob
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
 
+CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
+
 class LocalConfig(object):
     def __init__(self, allow_for_broken_config_opts=False, basedir=None):
         # define directories
@@ -32,9 +34,6 @@ class LocalConfig(object):
         self.dune_modules_cfg_filename = join(self.basedir, 'dune-modules.cfg')
         self.demos_cfg_filename = join(self.basedir, 'demos.cfg')
 
-        self.cc = ''
-        self.cxx = ''
-        self.f77 = ''
         self.cxx_flags = ''
         self.config_opts_filename = ''
         self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i,j in itertools.product(range(4,7), range(10))}
@@ -42,8 +41,9 @@ class LocalConfig(object):
         if allow_for_broken_config_opts:
             try:
                 self._parse_config_opts()
-            except:
-                pass
+            except RuntimeError as r:
+                for i in ('cc', 'cxx', 'f77'):
+                    setattr(self, i, CONFIG_DEFAULTS[i])
         else:
             self._parse_config_opts()
 
