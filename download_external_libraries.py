@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import ConfigParser
+import pytest
 import urllib
 import os
 from os.path import join
@@ -123,6 +124,21 @@ def download_all():
     if failures > 0:
         log.error('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
     sys.exit(failures)
+
+
+
+TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata')
+
+@pytest.fixture(params=[os.path.join(root, fn)
+                        for root,_, files in os.walk(os.path.join(TESTDATA_DIR, 'ext_configs')) for fn in files])
+def config_filename(request):
+    return request.param
+
+def test_shipped_configs(config_filename):
+    os.environ['OPTS'] = os.path.join(TESTDATA_DIR, '..', 'config.opts', 'clang')
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+    download_all()
+
 
 if __name__ == '__main__':
     download_all()
