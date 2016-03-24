@@ -13,6 +13,7 @@ from string import Template
 from pprint import pprint
 import shlex
 import glob
+from tempfile import NamedTemporaryFile
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
@@ -230,9 +231,36 @@ TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdat
 def config_filename(request):
     return request.param
 
-def test_configs(config_filename):
+def test_shipped_configs(config_filename):
     os.environ['OPTS'] = config_filename
     os.environ['INSTALL_PREFIX'] = '/tmp'
-    cfg = LocalConfig(basedir=os.path.dirname(config_filename))
+    cfg = LocalConfig(basedir=TESTDATA_DIR)
     assert cfg.config_opts_filename == config_filename
+
+def test_missing():
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+
+    os.environ['OPTS'] = 'nosuch.opts'
+    with pytest.raises(IOError) as err:
+        cfg = LocalConfig()
+    assert 'Environment defined OPTS not discovered' in str(err.value)
+
+    with NamedTemporaryFile() as tmp:
+        tmp.write('CF=;;')
+        os.environ['OPTS'] = tmp.name
+        cfg = LocalConfig(allow_for_broken_config_opts=True)
+        assert cfg.cxx == 'g++' and cfg.f77 == 'gfortran' and cfg.cc == 'gcc'
+        assert cfg.cxx_flags == ''
+
+    del os.environ['OPTS']
+    with pytest.raises(RuntimeError) as err:
+        cfg = LocalConfig()
+    assert 'You either have to set OPTS or CC in order to specify a config.opts file' in str(err.value)
+
+    os.environ['CC'] = 'nosuch.compiler'
+    with pytest.raises(IOError) as err:
+        cfg = LocalConfig()
+    assert 'No suitable opts file for CC' in str(err.value)
+
+
 
