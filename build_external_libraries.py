@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import with_statement
+from __future__ import print_function, absolute_import, with_statement
 
 try:
     import ConfigParser as configparser
@@ -9,7 +9,8 @@ except ImportError:
 import os
 from os.path import join
 import sys
-import common
+
+from . import common
 
 VERBOSE = len(sys.argv) <= 1
 log = common.get_logger('external_libraries.build')

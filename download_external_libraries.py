@@ -14,7 +14,7 @@ import sys
 import tarfile
 import subprocess
 
-import common
+from . import common
 
 
 log = common.get_logger('external_libraries.download')

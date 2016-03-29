@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import, with_statement
 try:
     import ConfigParser as configparser
 except ImportError:
@@ -9,7 +9,7 @@ import subprocess
 import sys
 import os
 
-import common
+from . import common
 
 
 def build_modules():

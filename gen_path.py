@@ -1,9 +1,9 @@
 #!/usr/bin/env python2.7
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import, with_statement
 from os.path import join
 
-import common as common
+from . import common
 
 if __name__ == '__main__':
     local_config = common.LocalConfig()
