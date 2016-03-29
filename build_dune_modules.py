@@ -21,7 +21,7 @@ def build_modules():
     log.debug('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
     config = configparser.ConfigParser()
     try:
-        config.readfp(open(filename, mode='rb'))
+        config.readfp(open(filename, mode='rt'))
     except IOError:
         log.debug(': does not exist, calling duncontrol')
         ret = subprocess.call('{} --opts={} all'.format(DCNTRL, local_config.config_opts_filename),

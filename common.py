@@ -73,7 +73,7 @@ class LocalConfig(object):
             possibles = (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS']))
             for filename in possibles:
                 try:
-                    return filename, open(filename, mode='rb').read()
+                    return filename, open(filename, mode='rt').read()
                 except IOError:
                     continue
             raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
@@ -85,7 +85,7 @@ class LocalConfig(object):
         for filename in (join(dirname, pref + cc) for dirname, pref in
                          itertools.product(search_dirs, prefixes)):
             try:
-                return filename, open(filename, mode='rb').read()
+                return filename, open(filename, mode='rt').read()
             except IOError:
                 continue
         else:
@@ -94,7 +94,7 @@ class LocalConfig(object):
 
     def _get_config_opts(self, env):
         try:
-            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS'], mode='rb').read()
+            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS'], mode='rt').read()
         except (IOError, KeyError):
             self.config_opts_filename, config_opts = self._try_opts(env)
 
@@ -249,7 +249,7 @@ def test_missing():
         cfg = mk_config()
     assert 'Environment defined OPTS not discovered' in str(err.value)
 
-    with NamedTemporaryFile(dir=TESTDATA_DIR, mode='wb') as tmp:
+    with NamedTemporaryFile(dir=TESTDATA_DIR, mode='wt') as tmp:
         tmp.write('CF=;;')
         os.environ['OPTS'] = tmp.name
         cfg = mk_config(allow_for_broken_config_opts=True)

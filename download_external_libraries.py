@@ -69,7 +69,7 @@ def git_clone_library(local_config, library, src):
     if os.path.exists(join(local_config.srcdir, library)):
         log.debug('not necessary (already exists)')
     else:
-        with open(os.devnull, 'wb') as devnull:
+        with open(os.devnull, 'wt') as devnull:
             subprocess.check_call('git clone ' + src + ' ' + library,
                               shell=True,
                               env=local_config.make_env(),
@@ -85,7 +85,7 @@ def download_all(local_config=None):
             end='')
     ext_libs_config = configparser.ConfigParser()
     try:
-        ext_libs_config.readfp(open(local_config.external_libraries_cfg_filename, mode='rb'))
+        ext_libs_config.readfp(open(local_config.external_libraries_cfg_filename, mode='rt'))
     except:
         raise Exception('Could not open \'{filename}\' with configparser!'.format(
             filename=local_config.external_libraries_cfg_filename))
