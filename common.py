@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import, with_statement
 import os
+import pytest
+import types
 from os.path import join
 import logging
 import subprocess
@@ -10,14 +12,18 @@ import itertools
 from string import Template
 from pprint import pprint
 import shlex
+import glob
+from tempfile import NamedTemporaryFile
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
 
+CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
+
 class LocalConfig(object):
-    def __init__(self, allow_for_broken_config_opts=False):
+    def __init__(self, allow_for_broken_config_opts=False, basedir=None, external_libraries=None):
         # define directories
-        self.basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
+        self.basedir = basedir or os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
         self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
         self.srcdir = join(self.install_prefix, 'src')
         try:
@@ -26,13 +32,10 @@ class LocalConfig(object):
             if os_error.errno != os.errno.EEXIST:
                 raise os_error
 
-        self.external_libraries_cfg_filename = join(self.basedir, 'external-libraries.cfg')
+        self.external_libraries_cfg_filename = external_libraries or join(self.basedir, 'external-libraries.cfg')
         self.dune_modules_cfg_filename = join(self.basedir, 'dune-modules.cfg')
         self.demos_cfg_filename = join(self.basedir, 'demos.cfg')
 
-        self.cc = ''
-        self.cxx = ''
-        self.f77 = ''
         self.cxx_flags = ''
         self.config_opts_filename = ''
         self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i,j in itertools.product(range(4,7), range(10))}
@@ -40,8 +43,9 @@ class LocalConfig(object):
         if allow_for_broken_config_opts:
             try:
                 self._parse_config_opts()
-            except:
-                pass
+            except RuntimeError as r:
+                for i in ('cc', 'cxx', 'f77'):
+                    setattr(self, i, CONFIG_DEFAULTS[i])
         else:
             self._parse_config_opts()
 
@@ -56,7 +60,7 @@ class LocalConfig(object):
                 return cc
             for i, possible in enumerate(self.config_opts):
                 possible = list(shlex.shlex(possible))
-                if possible[0] == string and possible[1] == '=':
+                if len(possible) > 1 and possible[0] == string and possible[1] == '=':
                     return ''.join(possible[2:])
             return default
 
@@ -66,22 +70,22 @@ class LocalConfig(object):
 
     def _try_opts(self, env):
         if 'OPTS' in env:
-            for filename in (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])):
+            possibles = (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS']))
+            for filename in possibles:
                 try:
-                    return filename, open(filename).read()
+                    return filename, open(filename, mode='rt').read()
                 except IOError:
                     continue
-            raise Exception('You explicitely specified OPTS={}, but neither {} nor {} exist!'.format(
-                join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS'])))
+            raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
         if not 'CC' in env:
-            raise Exception('You either have to set OPTS or CC in order to specify a config.opts file!')
+            raise RuntimeError('You either have to set OPTS or CC in order to specify a config.opts file!')
         cc = os.path.basename(env['CC'])
         search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
         prefixes = ('config.opts.', '',)
         for filename in (join(dirname, pref + cc) for dirname, pref in
                          itertools.product(search_dirs, prefixes)):
             try:
-                return filename, open(filename).read()
+                return filename, open(filename, mode='rt').read()
             except IOError:
                 continue
         else:
@@ -90,7 +94,7 @@ class LocalConfig(object):
 
     def _get_config_opts(self, env):
         try:
-            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS']).read()
+            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS'], mode='rt').read()
         except (IOError, KeyError):
             self.config_opts_filename, config_opts = self._try_opts(env)
 
@@ -110,7 +114,8 @@ class LocalConfig(object):
             if token == 'CMAKE_FLAGS':
                 flag_arg = '-DCMAKE_CXX_FLAGS'
                 return _extract_from(parts, flag_arg)
-        raise Exception('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(self.config_opts_filename))
+        raise RuntimeError('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(
+                self.config_opts_filename))
 
 
     def make_env(self):
@@ -153,11 +158,51 @@ def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.safe_substitute(subst)
     return build_command
 
+class LineEndStreamhandler(logging.StreamHandler):
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            if not hasattr(types, "UnicodeType"): #if no unicode support...
+                self.stream.write(msg)
+            else:
+                try:
+                    if getattr(self.stream, 'encoding', None) is not None:
+                        self.stream.write(msg.encode(self.stream.encoding))
+                    else:
+                        self.stream.write(msg)
+                except UnicodeError:
+                    self.stream.write(msg.encode("UTF-8"))
+            try:
+                end = record.end
+            except AttributeError:
+                end = os.linesep
+            self.stream.write(end)
+            self.flush()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
 
 def get_logger(name=__file__):
     log = logging.getLogger(name)
     log_lvl = logging.DEBUG if VERBOSE else logging.INFO
+
+    handler = LineEndStreamhandler(stream=sys.stdout)
+    myFormatter = logging.Formatter('%(message)s')
+    handler.setFormatter(myFormatter)
+    log.handlers = [handler]
     log.setLevel(log_lvl)
+    #monkey patch to allow passing end=str as a kwarg like the print_function does
+    old_log = log._log
+    def mlog(self, msg, *args, **kwargs):
+        if 'end' in kwargs:
+            kwargs['extra'] = {'end': kwargs['end']}
+            del kwargs['end']
+        old_log(msg, *args, **kwargs)
+    log._log = types.MethodType(mlog, log)
+    log.propagate = False
     return log
 
 
@@ -167,7 +212,7 @@ def process_commands(local_config, commands, cwd):
     for build_command in commands.split(local_config.command_sep()):
         build_command = _prep_build_command(VERBOSE, local_config, build_command)
         log.debug('  calling \'{build_command}\':'.format(build_command=build_command))
-        with open(os.devnull, "w") as devnull:
+        with open(os.devnull, 'wb') as devnull:
             err = sys.stderr if VERBOSE else devnull
             out = sys.stdout if VERBOSE else devnull
             ret += subprocess.call(build_command,
@@ -179,3 +224,47 @@ def process_commands(local_config, commands, cwd):
         if ret != 0:
             return not bool(ret)
     return not bool(ret)
+
+TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata')
+
+@pytest.fixture(params=[os.path.join(root, fn)
+                        for root,_, files in os.walk(os.path.join(TESTDATA_DIR, 'config.opts')) for fn in files])
+def config_filename(request):
+    return request.param
+
+def mk_config(*args, **kwargs):
+    return LocalConfig(basedir=TESTDATA_DIR, *args, **kwargs)
+
+def test_shipped_configs(config_filename):
+    os.environ['OPTS'] = config_filename
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+    cfg = mk_config()
+    assert cfg.config_opts_filename == config_filename
+
+def test_missing():
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+
+    os.environ['OPTS'] = 'nosuch.opts'
+    with pytest.raises(IOError) as err:
+        cfg = mk_config()
+    assert 'Environment defined OPTS not discovered' in str(err.value)
+
+    with NamedTemporaryFile(dir=TESTDATA_DIR, mode='wt') as tmp:
+        tmp.write('CF=;;')
+        os.environ['OPTS'] = tmp.name
+        cfg = mk_config(allow_for_broken_config_opts=True)
+        assert cfg.cxx == 'g++' and cfg.f77 == 'gfortran' and cfg.cc == 'gcc'
+        assert cfg.cxx_flags == ''
+
+    del os.environ['OPTS']
+    with pytest.raises(RuntimeError) as err:
+        cfg = mk_config()
+    assert 'You either have to set OPTS or CC in order to specify a config.opts file' in str(err.value)
+
+    os.environ['CC'] = 'nosuch.compiler'
+    with pytest.raises(IOError) as err:
+        cfg = mk_config()
+    assert 'No suitable opts file for CC' in str(err.value)
+
+
+

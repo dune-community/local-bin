@@ -1,0 +1,9 @@
+CONFIGURE_FLAGS="CXX=mpic++ CC=mpicc \
+  CXXFLAGS='-DNDEBUG -std=c++11 -O3 -g -w -DDUNE_STUFF_FUNCTIONS_DISABLE_CHECKS -funroll-loops -m64 -mfpmath=sse -falign-loops -mtune=native -march=native -pipe -fomit-frame-pointer -O4' \
+  LDFLAGS='-lpthread -lgfortran -L/home/rmilk/local/lib ' \
+  --enable-parallel \
+  --with-parmetis=/home/rmilk/local \ 
+  --disable-documentation  INKSCAPE=no"
+CMAKE_FLAGS="-Wno-dev -DFFTW_ROOT=/home/rmilk/local/ -DCMAKE_BUILD_TYPE='' -DBOOST_ROOT=../local -DBoost_NO_SYSTEM_PATHS=TRUE -DPARMETIS_INCLUDE_DIR=/home/rmilk/local/include -DPARMETIS_LIBRARY=/home/rmilk/local/lib/libparmetis.a -DUMFPACK_ROOT=/home/rmilk/local/  -DSUITESPARSE_INCLUDE_DIR_HINTS=/home/rmilk/local/include -DSUITESPARSE_LIBRARY_DIR_HINTS=/home/rmilk/local/lib " \
+MAKE_FLAGS="-- -j1 -l1"
+BUILDDIR=/scratch/rmilk/multiscale-build/

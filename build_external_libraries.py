@@ -1,12 +1,16 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
-from __future__ import with_statement
+from __future__ import print_function, absolute_import, with_statement
 
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 import os
 from os.path import join
 import sys
-import common
+
+from . import common
 
 VERBOSE = len(sys.argv) <= 1
 log = common.get_logger('external_libraries.build')
@@ -24,13 +28,11 @@ def build_library(library, config, local_config):
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
 
-# build_library
-
-if __name__ == '__main__':
+def build_all():
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
     log.debug('reading \'{}\': '.format(os.path.basename(filename)))
-    config = ConfigParser.SafeConfigParser({'only_build': 'False'})
+    config = configparser.SafeConfigParser({'only_build': 'False'})
     if not os.path.isfile(filename):
         raise Exception('Could not open \'{}\' with configparser!'.format(filename))
     config.read(filename)
@@ -70,3 +72,6 @@ if __name__ == '__main__':
     if failure > 0:
         log.critical('  call \'./local/bin/build_external_libraries.py\' manually to examine errors')
     sys.exit(failure)
+
+if __name__ == '__main__':
+    build_all()

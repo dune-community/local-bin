@@ -28,5 +28,3 @@ if [ $? != 0 ] ; then
   exit 1
 fi
 
-echo "building demos:"
-./local/bin/build_demos.py 1

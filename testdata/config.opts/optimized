@@ -1,0 +1,12 @@
+CONFIGURE_FLAGS="
+  CC=gcc \
+  CXX=g++ \
+  F77=gfortran \
+  CXXFLAGS='-DDEBUG -g -std=c++0x -DDUNE_STUFF_FUNCTIONS_DISABLE_CHECKS -funroll-loops -m64 -mfpmath=sse -falign-loops -mtune=native -march=native -pipe -fomit-frame-pointer -O4' \
+  --disable-documentation \
+  --enable-parallel \
+  INKSCAPE=no \
+"
+CMAKE_FLAGS="-Wno-dev -DUMFPACK_ROOT=/home/r/r_milk01/local -DMETIS_ROOT=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local -DMETIS_INCLUDE_DIR=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local/include  -DPARMETIS_ROOT=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local -DPARMETIS_INCLUDE_DIR=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local/include -DEIGEN3_INCLUDE_DIR=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local/include/eigen3  -DBLAS_LIBRARIES=/home/r/r_milk01/local/lib/libblas.a -DBOOST_ROOT=/home/r/r_milk01/projekte/uni/dune/cmake_multiscale/local -DBoost_NO_SYSTEM_PATHS=TRUE -DCMAKE_BUILD_TYPE='' -DSUITESPARSE_INCLUDE_DIR_HINTS=/home/r/r_milk01/local/include/ -DSUITESPARSE_LIBRARY_DIR_HINTS=/home/r/r_milk01/local/lib/"
+MAKE_FLAGS="-- -j 12"
+BUILDDIR=/scratch/tmp/r_milk01/build/

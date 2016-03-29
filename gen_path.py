@@ -1,13 +1,13 @@
 #!/usr/bin/env python2.7
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import, with_statement
 from os.path import join
 
-import common as common
+from . import common
 
 if __name__ == '__main__':
     local_config = common.LocalConfig()
-    with open(join(local_config.basedir, 'PATH.sh'), 'w') as pathfile:
+    with open(join(local_config.basedir, 'PATH.sh'), 'wb') as pathfile:
         pathfile.write('export BASEDIR={}\n'.format(local_config.basedir))
         pathfile.write('export INSTALL_PREFIX={}\n'.format(local_config.install_prefix))
         pathfile.write('export PATH=${INSTALL_PREFIX}/bin:$PATH\n')
