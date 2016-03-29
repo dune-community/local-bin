@@ -27,9 +27,7 @@ def build_library(library, config, local_config):
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
 
-# build_library
-
-if __name__ == '__main__':
+def build_all():
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
     log.debug('reading \'{}\': '.format(os.path.basename(filename)))
@@ -73,3 +71,6 @@ if __name__ == '__main__':
     if failure > 0:
         log.critical('  call \'./local/bin/build_external_libraries.py\' manually to examine errors')
     sys.exit(failure)
+
+if __name__ == '__main__':
+    build_all()

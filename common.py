@@ -21,7 +21,7 @@ logging.basicConfig()
 CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
 
 class LocalConfig(object):
-    def __init__(self, allow_for_broken_config_opts=False, basedir=None):
+    def __init__(self, allow_for_broken_config_opts=False, basedir=None, external_libraries=None):
         # define directories
         self.basedir = basedir or os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
         self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
@@ -32,7 +32,7 @@ class LocalConfig(object):
             if os_error.errno != os.errno.EEXIST:
                 raise os_error
 
-        self.external_libraries_cfg_filename = join(self.basedir, 'external-libraries.cfg')
+        self.external_libraries_cfg_filename = external_libraries or join(self.basedir, 'external-libraries.cfg')
         self.dune_modules_cfg_filename = join(self.basedir, 'dune-modules.cfg')
         self.demos_cfg_filename = join(self.basedir, 'demos.cfg')
 
@@ -73,7 +73,7 @@ class LocalConfig(object):
             possibles = (join(self.basedir, env['OPTS']), join(self.basedir, 'config.opts', env['OPTS']))
             for filename in possibles:
                 try:
-                    return filename, open(filename).read()
+                    return filename, open(filename, mode='rb').read()
                 except IOError:
                     continue
             raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
@@ -85,7 +85,7 @@ class LocalConfig(object):
         for filename in (join(dirname, pref + cc) for dirname, pref in
                          itertools.product(search_dirs, prefixes)):
             try:
-                return filename, open(filename).read()
+                return filename, open(filename, mode='rb').read()
             except IOError:
                 continue
         else:
@@ -94,7 +94,7 @@ class LocalConfig(object):
 
     def _get_config_opts(self, env):
         try:
-            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS']).read()
+            self.config_opts_filename, config_opts = env['OPTS'], open(env['OPTS'], mode='rb').read()
         except (IOError, KeyError):
             self.config_opts_filename, config_opts = self._try_opts(env)
 
@@ -212,7 +212,7 @@ def process_commands(local_config, commands, cwd):
     for build_command in commands.split(local_config.command_sep()):
         build_command = _prep_build_command(VERBOSE, local_config, build_command)
         log.debug('  calling \'{build_command}\':'.format(build_command=build_command))
-        with open(os.devnull, "w") as devnull:
+        with open(os.devnull, 'wb') as devnull:
             err = sys.stderr if VERBOSE else devnull
             out = sys.stdout if VERBOSE else devnull
             ret += subprocess.call(build_command,
@@ -232,10 +232,13 @@ TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdat
 def config_filename(request):
     return request.param
 
+def mk_config(*args, **kwargs):
+    return LocalConfig(basedir=TESTDATA_DIR, *args, **kwargs)
+
 def test_shipped_configs(config_filename):
     os.environ['OPTS'] = config_filename
     os.environ['INSTALL_PREFIX'] = '/tmp'
-    cfg = LocalConfig(basedir=TESTDATA_DIR)
+    cfg = mk_config()
     assert cfg.config_opts_filename == config_filename
 
 def test_missing():
@@ -243,24 +246,24 @@ def test_missing():
 
     os.environ['OPTS'] = 'nosuch.opts'
     with pytest.raises(IOError) as err:
-        cfg = LocalConfig()
+        cfg = mk_config()
     assert 'Environment defined OPTS not discovered' in str(err.value)
 
-    with NamedTemporaryFile() as tmp:
+    with NamedTemporaryFile(dir=TESTDATA_DIR, mode='wb') as tmp:
         tmp.write('CF=;;')
         os.environ['OPTS'] = tmp.name
-        cfg = LocalConfig(allow_for_broken_config_opts=True)
+        cfg = mk_config(allow_for_broken_config_opts=True)
         assert cfg.cxx == 'g++' and cfg.f77 == 'gfortran' and cfg.cc == 'gcc'
         assert cfg.cxx_flags == ''
 
     del os.environ['OPTS']
     with pytest.raises(RuntimeError) as err:
-        cfg = LocalConfig()
+        cfg = mk_config()
     assert 'You either have to set OPTS or CC in order to specify a config.opts file' in str(err.value)
 
     os.environ['CC'] = 'nosuch.compiler'
     with pytest.raises(IOError) as err:
-        cfg = LocalConfig()
+        cfg = mk_config()
     assert 'No suitable opts file for CC' in str(err.value)
 
 
