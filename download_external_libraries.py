@@ -1,18 +1,27 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-try:
-    import ConfigParser as configparser
-except ImportError:
-    import configparser
-import pytest
-import urllib
+from __future__ import print_function, absolute_import, with_statement
+
+import mimetypes
+import traceback
+import sys
 import os
 from os.path import join
 import shutil
 import sys
 import tarfile
 import subprocess
+
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+import pytest
+
+if sys.version_info[0] == 3:
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
 
 from . import common
 
@@ -26,11 +35,10 @@ def download_library(local_config, library, src):
     dest = join(local_config.srcdir, os.path.basename(src))
     filename = join(local_config.srcdir, dest)
     if os.path.exists(filename):
-        filename, h = urllib.urlretrieve(filename)
-        filetype = h['Content-Type']
+        filetype, _ = mimetypes.guess_type(filename)
         log.debug('not necessary (already exists)')
     else:
-        filename, headers = urllib.urlretrieve(src, dest)
+        filename, headers = urlretrieve(src, dest)
         filetype = headers['Content-Type']
         log.debug('done')
     log.debug('  unpacking \'{filename}\' '.format(filename=filename.split('/')[-1]), end='')
@@ -116,7 +124,7 @@ def download_all(local_config=None):
         except Exception as e:
             failures += 1
             log.info('failed')
-            log.debug(e)
+            log.debug(traceback.format_exc())
 
     if failures > 0:
         log.critical('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
@@ -134,7 +142,8 @@ def config_filename(request):
 def test_shipped_configs(config_filename):
     os.environ['OPTS'] = os.path.join(TESTDATA_DIR, 'config.opts', 'clang')
     os.environ['INSTALL_PREFIX'] = '/tmp'
-    download_all(local_config=common.mk_config(external_libraries=config_filename))
+    fails = download_all(local_config=common.mk_config(external_libraries=config_filename))
+    assert fails == 0
 
 
 if __name__ == '__main__':
