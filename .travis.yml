@@ -12,7 +12,7 @@ addons:
 # before_install:
 # command to install dependencies
 install:
-    - pip install pytest
+    - pip install pytest python-coveralls
 
 # before_script:
 
@@ -29,8 +29,8 @@ notifications:
     on_success: change
     on_failure: change
 
-#after_success:
-#- coveralls
+after_success:
+- coveralls
 
 branches:
   except:
