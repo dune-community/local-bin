@@ -12,6 +12,7 @@ import sys
 from localscripts import common
 from localscripts.common import BraceMessage as Br
 
+
 def build_modules():
     log = common.get_logger('dune-modules.build')
     dcntrl = './dune-common/bin/dunecontrol --use-cmake'
@@ -49,12 +50,9 @@ def build_modules():
                     local_all = config.get(dune_module, 'all')
                     assert (len(local_all) > 0)
                 for a_ in local_all.split():
-                    commands.append('{} --opts={config_opts} --only={dune_module}'
-                                    + ' {a_}'.format(dcntrl, config_opts=local_config.config_opts_filename,
-                                                     dune_module=dune_module,
-                                                     a_=a_))
-                    short_commands.append('{dune_module}:' + ' {a_}'.format(dune_module=dune_module,
-                                                                            a_=a_))
+                    commands.append('{} --opts={config_opts} --only={dune_module} {a_}'.format(
+                            dcntrl, config_opts=local_config.config_opts_filename, dune_module=dune_module, a_=a_))
+                    short_commands.append('{dune_module}: {a_}'.format(dune_module=dune_module, a_=a_))
         else:
             for a_ in all_.split():
                 commands.append('{} --opts={config_opts} {a_}'.format(dcntrl,
