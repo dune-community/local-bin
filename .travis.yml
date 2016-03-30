@@ -18,7 +18,7 @@ install:
 
 script:
     - set -e
-    - py.test common.py
+    - py.test 
 
 # runs independent of 'script' failure/success
 # after_script:
