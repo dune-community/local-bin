@@ -223,7 +223,7 @@ def process_commands(local_config, commands, cwd):
             return not bool(ret)
     return not bool(ret)
 
-TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata')
+TESTDATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'testdata'))
 
 
 @pytest.fixture(params=[os.path.join(root, fn)
