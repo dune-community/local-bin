@@ -42,7 +42,7 @@ class LocalConfig(object):
         if allow_for_broken_config_opts:
             try:
                 self._parse_config_opts()
-            except RuntimeError as r:
+            except RuntimeError:
                 for i in ('cc', 'cxx', 'f77'):
                     setattr(self, i, CONFIG_DEFAULTS[i])
         else:
@@ -57,7 +57,7 @@ class LocalConfig(object):
             cc = os.environ.get(string)
             if cc is not None:
                 return cc
-            for i, possible in enumerate(self.config_opts):
+            for possible in self.config_opts:
                 possible = list(shlex.shlex(possible))
                 if len(possible) > 1 and possible[0] == string and possible[1] == '=':
                     return ''.join(possible[2:])
@@ -87,8 +87,7 @@ class LocalConfig(object):
                 return filename, open(filename, mode='rt').read()
             except IOError:
                 continue
-        else:
-            raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
+        raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
 
     def _get_config_opts(self, env):
         try:
@@ -96,7 +95,7 @@ class LocalConfig(object):
         except (IOError, KeyError):
             self.config_opts_filename, config_opts = self._try_opts(env)
 
-        def _extract_from(parts, flag_arg):
+        def _extract_from(i, parts, flag_arg):
             configure_flags = parts[i + 2]
             configure_flags = [f.strip() for f in shlex.split(configure_flags, posix=True) if f != '\n']
             for arg in configure_flags:
@@ -108,10 +107,10 @@ class LocalConfig(object):
         for i, token in enumerate(parts):
             if token == 'CONFIGURE_FLAGS':
                 flag_arg = 'CXXFLAGS'
-                return _extract_from(parts, flag_arg)
+                return _extract_from(i, parts, flag_arg)
             if token == 'CMAKE_FLAGS':
                 flag_arg = '-DCMAKE_CXX_FLAGS'
-                return _extract_from(parts, flag_arg)
+                return _extract_from(i, parts, flag_arg)
         raise RuntimeError('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(
                 self.config_opts_filename))
 

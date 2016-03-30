@@ -8,7 +8,6 @@ import sys
 import os
 from os.path import join
 import shutil
-import sys
 import tarfile
 import subprocess
 from . import common
