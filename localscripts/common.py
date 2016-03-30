@@ -209,7 +209,7 @@ def process_commands(local_config, commands, cwd):
     log = get_logger('process_commands')
     for build_command in commands.split(local_config.command_sep()):
         build_command = _prep_build_command(VERBOSE, local_config, build_command)
-        log.debug('  calling \'{build_command}\':'.format(build_command=build_command))
+        log.debug(BraceMessage('  calling \'{build_command}\':', build_command=build_command))
         with open(os.devnull, 'wb') as devnull:
             err = sys.stderr if VERBOSE else devnull
             out = sys.stdout if VERBOSE else devnull
@@ -222,6 +222,17 @@ def process_commands(local_config, commands, cwd):
         if ret != 0:
             return not bool(ret)
     return not bool(ret)
+
+
+class BraceMessage:
+    def __init__(self, fmt, *args, **kwargs):
+        self.fmt = fmt
+        self.args = args
+        self.kwargs = kwargs
+
+    def __str__(self):
+        return self.fmt.format(*self.args, **self.kwargs)
+
 
 TESTDATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'testdata'))
 

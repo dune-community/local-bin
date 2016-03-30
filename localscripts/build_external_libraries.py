@@ -22,8 +22,6 @@ def build_library(library, config, local_config):
     if not os.path.isdir(src_dir):
         raise Exception(
             '\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(
-
-
                 path=src_dir))
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
@@ -32,7 +30,7 @@ def build_library(library, config, local_config):
 def build_all():
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
-    log.debug('reading \'{}\': '.format(os.path.basename(filename)))
+    log.debug(Br('reading \'{}\': ', os.path.basename(filename)))
     config = configparser.SafeConfigParser({'only_build': 'False'})
     if not os.path.isfile(filename):
         raise Exception('Could not open \'{}\' with configparser!'.format(filename))

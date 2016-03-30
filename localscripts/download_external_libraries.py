@@ -10,20 +10,17 @@ from os.path import join
 import shutil
 import tarfile
 import subprocess
-from localscripts import common
-
 try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
 import pytest
-
 if sys.version_info[0] == 3:
     from urllib.request import urlretrieve
 else:
     from urllib import urlretrieve
-
-
+from localscripts import common
+from localscripts.common import BraceMessage as Br
 
 log = common.get_logger('external_libraries.download')
 
@@ -33,7 +30,7 @@ class DownloadException(Exception):
 
 
 def download_library(local_config, library, src):
-    log.debug('  downloading from \'{src}\'... '.format(src=src), end='')
+    log.debug(Br('  downloading from \'{src}\'... ', src=src), end='')
     dest = join(local_config.srcdir, os.path.basename(src))
     filename = join(local_config.srcdir, dest)
     if os.path.exists(filename):
@@ -43,14 +40,14 @@ def download_library(local_config, library, src):
         filename, headers = urlretrieve(src, dest)
         filetype = headers['Content-Type']
         log.debug('done')
-    log.debug('  unpacking \'{filename}\' '.format(filename=filename.split('/')[-1]), end='')
+    log.debug(Br('  unpacking \'{filename}\' ', filename=filename.split('/')[-1]), end='')
     if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
             'application/x-bzip'):
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
         extracted_dir_name = names[0].split('/')[0]
-        log.debug('to \'{extracted_dir_name}\'... '.format(extracted_dir_name=extracted_dir_name), end='')
+        log.debug(Br('to \'{extracted_dir_name}\'... ', extracted_dir_name=extracted_dir_name), end='')
         if not os.path.abspath(join(local_config.srcdir, extracted_dir_name)).startswith(local_config.srcdir):
             raise DownloadException('unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(
                     unsafe_name=extracted_dir_name))
@@ -67,7 +64,7 @@ def download_library(local_config, library, src):
     else:
         raise DownloadException('file is of wrong type (is \'{is_type}\'), aborting!'.format(is_type=filetype))
 
-    log.debug('  moving \'{src}\' to \'{dest}\'... '.format(src=extracted_dir_name, dest=library), end='')
+    log.debug(Br('  moving \'{src}\' to \'{dest}\'... ', src=extracted_dir_name, dest=library), end='')
     if os.path.exists(join(local_config.srcdir, library)):
         log.debug('not necessary (already exists)')
     else:
@@ -76,7 +73,7 @@ def download_library(local_config, library, src):
 
 
 def git_clone_library(local_config, library, src):
-    log.debug('  cloning \'{src}\':'.format(src=src))
+    log.debug(Br('  cloning \'{src}\':', src=src))
     if os.path.exists(join(local_config.srcdir, library)):
         log.debug('not necessary (already exists)')
     else:
@@ -121,8 +118,8 @@ def download_all(local_config=None):
             elif ext_libs_config.has_option(library, 'src'):
                 download_library(local_config=local_config, library=library, src=ext_libs_config.get(library, 'src'))
             else:
-                log.debug('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!'.format(
-                        library=library))
+                log.debug(Br('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!',
+                          library=library))
             log.info('done')
         except Exception as e:
             failures += 1

@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 from localscripts import common
-
+from localscripts.common import BraceMessage as Br
 
 def build_modules():
     log = common.get_logger('dune-modules.build')
@@ -18,7 +18,7 @@ def build_modules():
     local_config = common.LocalConfig()
     filename = local_config.dune_modules_cfg_filename
     # read config opts
-    log.debug('reading \'{filename}\''.format(filename=filename.split('/')[-1]), end='')
+    log.debug(Br('reading \'{filename}\'', filename=filename.split('/')[-1]), end='')
     config = configparser.ConfigParser()
     try:
         config.readfp(open(filename, mode='rt'))
