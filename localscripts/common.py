@@ -158,6 +158,7 @@ def _prep_build_command(verbose, local_config, build_command):
 class LineEndStreamhandler(logging.StreamHandler):
 
     def emit(self, record):
+        # noinspection PyBroadException
         try:
             msg = self.format(record)
             if not hasattr(types, "UnicodeType"):  #if no unicode support...
@@ -178,7 +179,7 @@ class LineEndStreamhandler(logging.StreamHandler):
             self.flush()
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception:
             self.handleError(record)
 
 
@@ -191,10 +192,10 @@ def get_logger(name=__file__):
     handler.setFormatter(myFormatter)
     log.handlers = [handler]
     log.setLevel(log_lvl)
-    #monkey patch to allow passing end=str as a kwarg like the print_function does
+    # monkey patch to allow passing end=str as a kwarg like the print_function does
     old_log = log._log
 
-    def mlog(self, msg, *args, **kwargs):
+    def mlog(_, msg, *args, **kwargs):
         if 'end' in kwargs:
             kwargs['extra'] = {'end': kwargs['end']}
             del kwargs['end']
@@ -224,7 +225,7 @@ def process_commands(local_config, commands, cwd):
     return not bool(ret)
 
 
-class BraceMessage:
+class BraceMessage(object):
     def __init__(self, fmt, *args, **kwargs):
         self.fmt = fmt
         self.args = args

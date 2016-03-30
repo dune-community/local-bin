@@ -11,6 +11,7 @@ from os.path import join
 import sys
 
 from localscripts import common
+from localscripts.common import BraceMessage as Br
 
 VERBOSE = len(sys.argv) <= 1
 log = common.get_logger('external_libraries.build')

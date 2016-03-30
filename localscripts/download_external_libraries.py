@@ -88,9 +88,8 @@ def git_clone_library(local_config, library, src):
 
 def download_all(local_config=None):
     local_config = local_config or common.LocalConfig(allow_for_broken_config_opts=True)
-    log.debug(
-            'reading \'{filename}\': '.format(filename=os.path.basename(local_config.external_libraries_cfg_filename)),
-            end='')
+    log.debug(Br('reading \'{filename}\': ', filename=os.path.basename(local_config.external_libraries_cfg_filename)),
+              end='')
     ext_libs_config = configparser.ConfigParser()
     try:
         ext_libs_config.readfp(open(local_config.external_libraries_cfg_filename, mode='rt'))
@@ -121,7 +120,7 @@ def download_all(local_config=None):
                 log.debug(Br('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!',
                           library=library))
             log.info('done')
-        except Exception as e:
+        except Exception:
             failures += 1
             log.info('failed')
             log.debug(traceback.format_exc())
