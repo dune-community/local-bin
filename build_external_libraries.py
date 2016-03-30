@@ -28,6 +28,7 @@ def build_library(library, config, local_config):
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
 
+
 def build_all():
     local_config = common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
@@ -60,7 +61,6 @@ def build_all():
             failure += 1
             log.info('failed')
             reports.append(library + ': failed')
-
 
     if len(reports) > 0:
         log.debug('''

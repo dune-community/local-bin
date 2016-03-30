@@ -11,6 +11,7 @@ import shutil
 import sys
 import tarfile
 import subprocess
+from . import common
 
 try:
     import ConfigParser as configparser
@@ -23,12 +24,14 @@ if sys.version_info[0] == 3:
 else:
     from urllib import urlretrieve
 
-from . import common
 
 
 log = common.get_logger('external_libraries.download')
 
-class DownloadException(Exception): pass
+
+class DownloadException(Exception):
+    pass
+
 
 def download_library(local_config, library, src):
     log.debug('  downloading from \'{src}\'... '.format(src=src), end='')
@@ -50,7 +53,8 @@ def download_library(local_config, library, src):
         extracted_dir_name = names[0].split('/')[0]
         log.debug('to \'{extracted_dir_name}\'... '.format(extracted_dir_name=extracted_dir_name), end='')
         if not os.path.abspath(join(local_config.srcdir, extracted_dir_name)).startswith(local_config.srcdir):
-            raise DownloadException('unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(unsafe_name=extracted_dir_name))
+            raise DownloadException('unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(
+                    unsafe_name=extracted_dir_name))
         for name in names:
             if not (name.startswith(extracted_dir_name + '/') or name is extracted_dir_name):
                 raise DownloadException('tars containing more than one toplevel dir not supported, aborting!')
@@ -79,11 +83,11 @@ def git_clone_library(local_config, library, src):
     else:
         with open(os.devnull, 'wt') as devnull:
             subprocess.check_call('git clone ' + src + ' ' + library,
-                              shell=True,
-                              env=local_config.make_env(),
-                              cwd=local_config.srcdir,
-                              stdout=sys.stdout if common.VERBOSE else devnull,
-                              stderr=sys.stderr if common.VERBOSE else devnull)
+                                  shell=True,
+                                  env=local_config.make_env(),
+                                  cwd=local_config.srcdir,
+                                  stdout=sys.stdout if common.VERBOSE else devnull,
+                                  stderr=sys.stderr if common.VERBOSE else devnull)
 
 
 def download_all(local_config=None):
@@ -131,13 +135,14 @@ def download_all(local_config=None):
     return failures
 
 
-
 TESTDATA_DIR = common.TESTDATA_DIR
 
+
 @pytest.fixture(params=[os.path.join(root, fn)
-                        for root,_, files in os.walk(os.path.join(TESTDATA_DIR, 'ext_configs')) for fn in files])
+                        for root, _, files in os.walk(os.path.join(TESTDATA_DIR, 'ext_configs')) for fn in files])
 def config_filename(request):
     return request.param
+
 
 def test_shipped_configs(config_filename):
     os.environ['OPTS'] = os.path.join(TESTDATA_DIR, 'config.opts', 'clang')

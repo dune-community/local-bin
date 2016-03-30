@@ -10,15 +10,14 @@ import subprocess
 import sys
 import itertools
 from string import Template
-from pprint import pprint
 import shlex
-import glob
 from tempfile import NamedTemporaryFile
 
 VERBOSE = len(sys.argv) <= 1
 logging.basicConfig()
 
 CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
+
 
 class LocalConfig(object):
     def __init__(self, allow_for_broken_config_opts=False, basedir=None, external_libraries=None):
@@ -38,7 +37,7 @@ class LocalConfig(object):
 
         self.cxx_flags = ''
         self.config_opts_filename = ''
-        self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i,j in itertools.product(range(4,7), range(10))}
+        self.boost_toolsets = {'gcc-{}.{}'.format(i, j): 'gcc' for i, j in itertools.product(range(4, 7), range(10))}
         self.boost_toolsets.update({'icc': 'intel-linux', 'clang': 'clang'})
         if allow_for_broken_config_opts:
             try:
@@ -77,7 +76,7 @@ class LocalConfig(object):
                 except IOError:
                     continue
             raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
-        if not 'CC' in env:
+        if 'CC' not in env:
             raise RuntimeError('You either have to set OPTS or CC in order to specify a config.opts file!')
         cc = os.path.basename(env['CC'])
         search_dirs = (self.basedir, join(self.basedir, 'opts'), join(self.basedir, 'config.opts'))
@@ -90,7 +89,6 @@ class LocalConfig(object):
                 continue
         else:
             raise IOError('No suitable opts file for CC {} in anyof {} x {}'.format(cc, search_dirs, prefixes))
-
 
     def _get_config_opts(self, env):
         try:
@@ -116,7 +114,6 @@ class LocalConfig(object):
                 return _extract_from(parts, flag_arg)
         raise RuntimeError('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}'.format(
                 self.config_opts_filename))
-
 
     def make_env(self):
         env = os.environ.copy()
@@ -158,12 +155,13 @@ def _prep_build_command(verbose, local_config, build_command):
     build_command = build_command.safe_substitute(subst)
     return build_command
 
+
 class LineEndStreamhandler(logging.StreamHandler):
 
     def emit(self, record):
         try:
             msg = self.format(record)
-            if not hasattr(types, "UnicodeType"): #if no unicode support...
+            if not hasattr(types, "UnicodeType"):  #if no unicode support...
                 self.stream.write(msg)
             else:
                 try:
@@ -196,6 +194,7 @@ def get_logger(name=__file__):
     log.setLevel(log_lvl)
     #monkey patch to allow passing end=str as a kwarg like the print_function does
     old_log = log._log
+
     def mlog(self, msg, *args, **kwargs):
         if 'end' in kwargs:
             kwargs['extra'] = {'end': kwargs['end']}
@@ -227,13 +226,16 @@ def process_commands(local_config, commands, cwd):
 
 TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata')
 
+
 @pytest.fixture(params=[os.path.join(root, fn)
                         for root,_, files in os.walk(os.path.join(TESTDATA_DIR, 'config.opts')) for fn in files])
 def config_filename(request):
     return request.param
 
+
 def mk_config(*args, **kwargs):
     return LocalConfig(basedir=TESTDATA_DIR, *args, **kwargs)
+
 
 def test_shipped_configs(config_filename):
     os.environ['OPTS'] = config_filename
@@ -241,12 +243,13 @@ def test_shipped_configs(config_filename):
     cfg = mk_config()
     assert cfg.config_opts_filename == config_filename
 
+
 def test_missing():
     os.environ['INSTALL_PREFIX'] = '/tmp'
 
     os.environ['OPTS'] = 'nosuch.opts'
     with pytest.raises(IOError) as err:
-        cfg = mk_config()
+        mk_config()
     assert 'Environment defined OPTS not discovered' in str(err.value)
 
     with NamedTemporaryFile(dir=TESTDATA_DIR, mode='wt') as tmp:
@@ -258,12 +261,12 @@ def test_missing():
 
     del os.environ['OPTS']
     with pytest.raises(RuntimeError) as err:
-        cfg = mk_config()
+        mk_config()
     assert 'You either have to set OPTS or CC in order to specify a config.opts file' in str(err.value)
 
     os.environ['CC'] = 'nosuch.compiler'
     with pytest.raises(IOError) as err:
-        cfg = mk_config()
+        mk_config()
     assert 'No suitable opts file for CC' in str(err.value)
 
 

@@ -8,6 +8,7 @@ from . import common
 if __name__ == '__main__':
     local_config = common.LocalConfig()
     with open(join(local_config.basedir, 'PATH.sh'), 'wb') as pathfile:
+        # see common._prep_build_command on how to make this more elegant
         pathfile.write('export BASEDIR={}\n'.format(local_config.basedir))
         pathfile.write('export INSTALL_PREFIX={}\n'.format(local_config.install_prefix))
         pathfile.write('export PATH=${INSTALL_PREFIX}/bin:$PATH\n')
