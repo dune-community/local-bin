@@ -66,7 +66,7 @@ class LocalConfig(object):
 
     def _read_opts_file(self, filename):
         # makes sure to throw IOError if file is missing
-        _ = open(filename).read()
+        open(filename).read()
         env = os.environ.copy()
         # prints only shell variables after sourcing the opts file
         shell_vars = subprocess.check_output('set -o posix ; source {} ; set '.format(filename),
@@ -86,7 +86,7 @@ class LocalConfig(object):
             for filename in possibles:
                 try:
                     return filename, self._read_opts_file(filename)
-                except IOError as e:
+                except IOError:
                     continue
             raise IOError('Environment defined OPTS not discovered in {}'.format(possibles))
         if 'CC' not in env:
@@ -250,8 +250,8 @@ class BraceMessage(object):
 TESTDATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'testdata'))
 CONFIG_DIR = os.path.join(TESTDATA_DIR, 'config.opts')
 
-@pytest.fixture(params=[os.path.join(CONFIG_DIR, file)
-                        for file in os.listdir(CONFIG_DIR) if os.path.isfile(os.path.join(CONFIG_DIR, file)) ])
+@pytest.fixture(params=[os.path.join(CONFIG_DIR, fn)
+                        for fn in os.listdir(CONFIG_DIR) if os.path.isfile(os.path.join(CONFIG_DIR, fn))])
 def config_filename(request):
     print('Checking {}'.format(request.param))
     return request.param
