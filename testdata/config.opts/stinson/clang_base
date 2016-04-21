@@ -1,0 +1,9 @@
+DIR="$(cd "$(dirname ${BASH_SOURCE[0]})" ;  pwd -P )"
+source ${DIR}/stinson_common
+
+TBB_CMAKE="-DTBB_DISABLE_FINAL_CHECK=1"
+CXX=clang++ 
+CC=clang 
+CONFIGURE_FLAGS="CXX=${CXX} CC=${CC} F77=${F77} CXXFLAGS=${CXXFLAGS}"
+CMAKE_FLAGS="-GNinja ${TBB_CMAKE} -Wno-dev -DCMAKE_BUILD_TYPE=${TYPE} ${CMAKE_EXTRA}"
+
