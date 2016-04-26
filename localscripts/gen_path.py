@@ -40,16 +40,12 @@ def gen_path(config=None):
         pathfile.write(_fill_tpl(local_config))
 
 
-class dummy_config(object):
+class DummyConfig(object):
     cc = 'compiler'
     cxx = 'cxx_compiler'
     f77 = 'fortran_compiler'
     install_prefix = '/home'
     basedir = '/tmp'
-
-
-def test_template():
-    config = dummy_config()
     expected = '''
 export BASEDIR=/tmp
 export INSTALL_PREFIX=/home
@@ -65,4 +61,21 @@ export OMP_NUM_THREADS=1
 export SIMDB_PATH=/home/DATA
 export QUEUE_DIRECTORY=/home/QUEUE
 '''
-    assert expected == _fill_tpl(config)
+
+
+def test_template():
+    config = DummyConfig()
+    assert config.expected == _fill_tpl(config)
+
+
+config_filename = common.config_filename
+
+
+def test_shipped_configs(config_filename):
+    os.environ['OPTS'] = config_filename
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+    cfg = common.mk_config()
+    tpl = _fill_tpl(cfg)
+    # issue #4
+    assert 'none' not in tpl.lower()
+    gen_path(cfg)
