@@ -35,7 +35,7 @@ def _fill_tpl(local_config):
 
 def gen_path(config=None):
     local_config = config or common.LocalConfig()
-    with open(join(local_config.basedir, 'PATH.sh'), 'wb') as pathfile:
+    with open(join(local_config.basedir, 'PATH.sh'), 'wt') as pathfile:
         # see common._prep_build_command on how to make this more elegant
         pathfile.write(_fill_tpl(local_config))
 

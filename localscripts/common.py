@@ -58,7 +58,7 @@ class LocalConfig(object):
             cc = os.environ.get(string)
             if cc is not None:
                 return cc
-            self.config_opts.get(string, default)
+            return self.config_opts.get(string, default)
 
         self.cc = find_opt('CC', default='gcc')
         self.cxx = find_opt('CXX', default='g++')
@@ -266,6 +266,7 @@ def test_shipped_configs(config_filename):
     os.environ['INSTALL_PREFIX'] = '/tmp'
     cfg = mk_config()
     assert cfg.config_opts_filename == config_filename
+    assert cfg.cc is not None
 
 
 def test_missing():
