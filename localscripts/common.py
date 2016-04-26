@@ -250,6 +250,7 @@ class BraceMessage(object):
 TESTDATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'testdata'))
 CONFIG_DIR = os.path.join(TESTDATA_DIR, 'config.opts')
 
+
 @pytest.fixture(params=[os.path.join(CONFIG_DIR, fn)
                         for fn in os.listdir(CONFIG_DIR) if os.path.isfile(os.path.join(CONFIG_DIR, fn))])
 def config_filename(request):
@@ -267,6 +268,13 @@ def test_shipped_configs(config_filename):
     cfg = mk_config()
     assert cfg.config_opts_filename == config_filename
     assert cfg.cc is not None
+
+
+def test_nested_newlines():
+    os.environ['OPTS'] = os.path.join(CONFIG_DIR, 'nested_newlines')
+    os.environ['INSTALL_PREFIX'] = '/tmp'
+    cfg = mk_config()
+    assert cfg.cxx_flags == '-DDEBUG -g3 -ggdb -std=c++11 -O2 -w -ftest-coverage -fPIC -DTHIS_IS_A_BUILDBOT_BUILD=1'
 
 
 def test_missing():

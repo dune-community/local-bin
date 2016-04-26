@@ -1,0 +1,27 @@
+if [[ ${CC} == *"clang"* ]] ; then
+  TBB_CMAKE="-DTBB_DISABLE_FINAL_CHECK=1"
+else
+  TBB_CMAKE=""
+fi
+
+CMAKE_FLAGS="\
+  -GNinja \
+  -Wno-dev \
+  -DCMAKE_INSTALL_PREFIX=$HOME/dune \
+  -DCMAKE_BUILD_TYPE=DEBUG \
+  -DCMAKE_CXX_FLAGS='\
+     -DDEBUG \
+     -g3 \
+     -ggdb \
+     -std=c++11 \
+     -O2 \
+     -w \
+     -ftest-coverage \
+     -fPIC \
+     -DTHIS_IS_A_BUILDBOT_BUILD=1 \
+    ' \
+  -DENABLE_HEADERCHECK=1 \
+  ${TBB_CMAKE} \
+  -DDISABLE_UBUNTU_WORKAROUND=1 \
+  -DDUNE_PYTHON_INSTALL_USER=travis \
+"
