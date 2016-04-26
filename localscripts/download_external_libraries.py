@@ -99,7 +99,7 @@ def download_all(local_config=None):
     libraries = ext_libs_config.sections()
     if len(libraries) == 0:
         log.debug(' no external libraries specified')
-        sys.exit(0)
+        return 0
     else:
         log.debug(' '.join(libraries))
 

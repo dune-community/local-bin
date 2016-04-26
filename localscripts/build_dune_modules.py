@@ -31,7 +31,7 @@ def build_modules():
                               cwd=local_config.basedir,
                               stdout=sys.stdout,
                               stderr=sys.stderr)
-        sys.exit(ret)
+        return ret
 
     # extract all commands
     commands = []
