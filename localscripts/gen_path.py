@@ -18,7 +18,7 @@ export CC=${CC}
 export CXX=${CXX}
 export F77=${F77}
 export PYTHON_VERSION=2.7
-[ -e ${INSTALL_PREFIX}/local/bin/activate ] && . ${INSTALL_PREFIX}/local/bin/activate
+[ -e ${INSTALL_PREFIX}/bin/activate ] && . ${INSTALL_PREFIX}/bin/activate
 export OMP_NUM_THREADS=1
 export SIMDB_PATH=${INSTALL_PREFIX}/DATA
 export QUEUE_DIRECTORY=${INSTALL_PREFIX}/QUEUE
