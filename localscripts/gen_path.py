@@ -56,7 +56,7 @@ export CC=compiler
 export CXX=cxx_compiler
 export F77=fortran_compiler
 export PYTHON_VERSION=2.7
-[ -e /home/local/bin/activate ] && . /home/local/bin/activate
+[ -e /home/bin/activate ] && . /home/bin/activate
 export OMP_NUM_THREADS=1
 export SIMDB_PATH=/home/DATA
 export QUEUE_DIRECTORY=/home/QUEUE
