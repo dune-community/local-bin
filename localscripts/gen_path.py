@@ -58,8 +58,8 @@ export F77=fortran_compiler
 export PYTHON_VERSION=2.7
 [ -e /home/bin/activate ] && . /home/bin/activate
 export OMP_NUM_THREADS=1
-export SIMDB_PATH=/home/DATA
-export QUEUE_DIRECTORY=/home/QUEUE
+export SIMDB_PATH=/tmp/DATA
+export QUEUE_DIRECTORY=/tmp/QUEUE
 '''
 
 
