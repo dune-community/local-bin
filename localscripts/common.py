@@ -274,7 +274,7 @@ def test_nested_newlines():
     os.environ['OPTS'] = os.path.join(CONFIG_DIR, 'nested_newlines')
     os.environ['INSTALL_PREFIX'] = '/tmp'
     cfg = mk_config()
-    assert cfg.cxx_flags == '-DDEBUG -g3 -ggdb -std=c++11 -O2 -w -ftest-coverage -fPIC -DTHIS_IS_A_BUILDBOT_BUILD=1'
+    assert cfg.cxx_flags == '-DDEBUG -g3 -ggdb -std=c++11 -O2 -w -ftest-coverage -fPIC -DDXT_DISABLE_LARGE_TESTS=1'
 
 
 def test_missing():

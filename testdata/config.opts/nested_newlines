@@ -18,7 +18,7 @@ CMAKE_FLAGS="\
      -w \
      -ftest-coverage \
      -fPIC \
-     -DTHIS_IS_A_BUILDBOT_BUILD=1 \
+     -DDXT_DISABLE_LARGE_TESTS=1 \
     ' \
   -DENABLE_HEADERCHECK=1 \
   ${TBB_CMAKE} \
