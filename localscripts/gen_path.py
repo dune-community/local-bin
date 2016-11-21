@@ -3,7 +3,6 @@
 from __future__ import print_function, absolute_import, with_statement
 
 import string
-import os
 from os.path import join
 
 from localscripts import common

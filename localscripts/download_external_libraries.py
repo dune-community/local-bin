@@ -14,7 +14,6 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-import pytest
 if sys.version_info[0] == 3:
     from urllib.request import urlretrieve
 else:
