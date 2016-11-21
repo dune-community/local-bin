@@ -128,23 +128,3 @@ def download_all(local_config=None):
     if failures > 0:
         log.critical('  call \'./local/bin/download_external_libraries.py\' manually to examine errors')
     return failures
-
-
-TESTDATA_DIR = common.TESTDATA_DIR
-
-
-@pytest.fixture(params=[os.path.join(root, fn)
-                        for root, _, files in os.walk(os.path.join(TESTDATA_DIR, 'ext_configs')) for fn in files])
-def config_filename(request):
-    return request.param
-
-
-def test_shipped_configs(config_filename):
-    os.environ['OPTS'] = os.path.join(TESTDATA_DIR, 'config.opts', 'clang')
-    os.environ['INSTALL_PREFIX'] = '/tmp'
-    fails = download_all(local_config=common.mk_config(external_libraries=config_filename))
-    assert fails == 0
-
-
-if __name__ == '__main__':
-    sys.exit(download_all())
