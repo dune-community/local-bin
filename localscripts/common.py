@@ -119,10 +119,10 @@ class LocalConfig(object):
                     return
             raise RuntimeError(configure_flags)
 
-        if 'CONFIGURE_FLAGS' in config_opts:
-            set_cxx_flags_from(config_opts['CONFIGURE_FLAGS'], flag_arg='CXXFLAGS')
-        elif 'CMAKE_FLAGS' in config_opts:
+        if 'CMAKE_FLAGS' in config_opts:
             set_cxx_flags_from(config_opts['CMAKE_FLAGS'], flag_arg='-DCMAKE_CXX_FLAGS')
+        elif 'CONFIGURE_FLAGS' in config_opts:
+            set_cxx_flags_from(config_opts['CONFIGURE_FLAGS'], flag_arg='CXXFLAGS')
         else:
             raise RuntimeError('found neither CMAKE_FLAGS nor CONFIGURE_FLAGS in opts file {}\n{}'.format(
                 self.config_opts_filename, config_opts))
