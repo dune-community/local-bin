@@ -55,8 +55,12 @@ class LocalConfig(object):
         def find_opt(string, default):
             cc = os.environ.get(string)
             if cc is not None:
-                return cc
-            return self.config_opts.get(string, default)
+                res = cc
+            else:
+                res = self.config_opts.get(string, default)
+            if isinstance(res, list):
+                return ' '.join(res)
+            return res
 
         self.cc = find_opt('CC', default='gcc')
         self.cxx = find_opt('CXX', default='g++')
