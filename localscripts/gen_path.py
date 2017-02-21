@@ -16,11 +16,8 @@ export PKG_CONFIG_PATH=${INSTALL_PREFIX}/lib64/pkgconfig:${INSTALL_PREFIX}/lib/p
 export CC=${CC}
 export CXX=${CXX}
 export F77=${F77}
-export PYTHON_VERSION=2.7
 [ -e ${INSTALL_PREFIX}/bin/activate ] && . ${INSTALL_PREFIX}/bin/activate
 export OMP_NUM_THREADS=1
-export SIMDB_PATH=${BASEDIR}/DATA
-export QUEUE_DIRECTORY=${BASEDIR}/QUEUE
 '''
 
 
