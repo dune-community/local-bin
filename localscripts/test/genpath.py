@@ -24,11 +24,8 @@ export PKG_CONFIG_PATH=/home/lib64/pkgconfig:/home/lib/pkgconfig:/home/share/pkg
 export CC=compiler
 export CXX=cxx_compiler
 export F77=fortran_compiler
-export PYTHON_VERSION=2.7
 [ -e /home/bin/activate ] && . /home/bin/activate
 export OMP_NUM_THREADS=1
-export SIMDB_PATH=/tmp/DATA
-export QUEUE_DIRECTORY=/tmp/QUEUE
 '''
 
 
