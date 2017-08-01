@@ -41,7 +41,7 @@ def download_library(local_config, library, src):
         log.debug('done')
     log.debug(Br('  unpacking \'{filename}\' ', filename=filename.split('/')[-1]), end='')
     if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
-            'application/x-bzip'):
+            'application/x-bzip') or filetype.startswith('application/gzip'):
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
