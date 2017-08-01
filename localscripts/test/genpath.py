@@ -18,13 +18,13 @@ class DummyConfig(object):
     expected = '''
 export BASEDIR=/tmp
 export INSTALL_PREFIX=/home
-export PATH=/home/bin:$PATH
-export LD_LIBRARY_PATH=/home/lib64:/home/lib:$LD_LIBRARY_PATH
-export PKG_CONFIG_PATH=/home/lib64/pkgconfig:/home/lib/pkgconfig:/home/share/pkgconfig:$PKG_CONFIG_PATH
+export PATH=${INSTALL_PREFIX}/bin:$PATH
+export LD_LIBRARY_PATH=${INSTALL_PREFIX}/lib64:${INSTALL_PREFIX}/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=${INSTALL_PREFIX}/lib64/pkgconfig:${INSTALL_PREFIX}/lib/pkgconfig:${INSTALL_PREFIX}/share/pkgconfig:$PKG_CONFIG_PATH
 export CC=compiler
 export CXX=cxx_compiler
 export F77=fortran_compiler
-[ -e /home/bin/activate ] && . /home/bin/activate
+[ -e ${INSTALL_PREFIX}/bin/activate ] && . ${INSTALL_PREFIX}/bin/activate
 export OMP_NUM_THREADS=1
 '''
 
