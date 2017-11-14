@@ -85,7 +85,7 @@ def git_clone_library(local_config, library, src):
                                   stderr=sys.stderr if common.VERBOSE else devnull)
 
 
-def download_all(local_config=None):
+def download_all(local_config):
     local_config = local_config or common.LocalConfig(allow_for_broken_config_opts=True)
     log.debug(Br('reading \'{filename}\': ', filename=os.path.basename(local_config.external_libraries_cfg_filename)),
               end='')

@@ -17,6 +17,14 @@ logging.basicConfig()
 CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
 
 
+def make_config():
+    libsname = os.environ.get('DXT_EXTERNAL_LIBS', 'debian-minimal')
+    basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
+    external_libraries = os.path.join(basedir, 'environments', libsname, 'external-libraries.cfg')
+    return LocalConfig(allow_for_broken_config_opts=False, basedir=basedir,
+                external_libraries=external_libraries)
+
+
 class LocalConfig(object):
     def __init__(self, allow_for_broken_config_opts=False, basedir=None, external_libraries=None):
         # define directories

@@ -28,8 +28,8 @@ def build_library(library, config, local_config):
     return common.process_commands(local_config, build_commands, src_dir)
 
 
-def build_all():
-    local_config = common.LocalConfig()
+def build_all(local_config):
+    local_config = local_config or common.LocalConfig()
     filename = local_config.external_libraries_cfg_filename
     log.debug(Br('reading \'{}\': ', os.path.basename(filename)))
     config = configparser.SafeConfigParser({'only_build': 'False'})

@@ -29,8 +29,8 @@ def _fill_tpl(local_config):
                                F77=local_config.f77, _INST_PREF_="${INSTALL_PREFIX}")
 
 
-def gen_path(config=None):
-    local_config = config or common.LocalConfig()
+def gen_path(local_config):
+    local_config = local_config or common.LocalConfig()
     with open(join(local_config.basedir, 'PATH.sh'), 'wt') as pathfile:
         # see common._prep_build_command on how to make this more elegant
         pathfile.write(_fill_tpl(local_config))
