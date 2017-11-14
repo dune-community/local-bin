@@ -42,8 +42,6 @@ class LocalConfig(object):
                 raise os_error
 
         self.external_libraries_cfg_filename = external_libraries or join(self.basedir, 'external-libraries.cfg')
-        self.dune_modules_cfg_filename = join(self.basedir, 'dune-modules.cfg')
-        self.demos_cfg_filename = join(self.basedir, 'demos.cfg')
 
         self.cxx_flags = ''
         self.config_opts_filename = ''
