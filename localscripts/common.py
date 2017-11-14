@@ -18,18 +18,22 @@ CONFIG_DEFAULTS = {'cc': 'gcc', 'cxx': 'g++', 'f77': 'gfortran'}
 
 
 def make_config():
-    environment = os.environ.get('DXT_ENVIRONMENT', 'debian-minimal')
+    env_name = os.environ.get('DXT_ENVIRONMENT', 'debian-minimal')
     basedir = os.path.abspath(join(os.path.dirname(sys.argv[0]), '..'))
-    external_libraries = os.path.join(basedir, 'environments', environment, 'external-libraries.cfg')
+    environments = os.path.join(basedir, 'environments', env_name)
+    install_prefix = os.path.join(environments, 'local')
+    external_libraries =  os.path.join(environments, 'external-libraries.cfg')
     return LocalConfig(allow_for_broken_config_opts=False, basedir=basedir,
-                external_libraries=external_libraries)
+                external_libraries=external_libraries, install_prefix=install_prefix)
 
 
 class LocalConfig(object):
-    def __init__(self, allow_for_broken_config_opts=False, basedir=None, external_libraries=None):
+    def __init__(self, allow_for_broken_config_opts=False, basedir=None,
+                 external_libraries=None,
+                 install_prefix=None):
         # define directories
         self.basedir = basedir or os.path.abspath(join(os.path.dirname(sys.argv[0]), '..', '..'))
-        self.install_prefix = os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
+        self.install_prefix = install_prefix or os.environ.get('INSTALL_PREFIX', join(self.basedir, 'local'))
         self.srcdir = join(self.install_prefix, 'src')
         try:
             os.makedirs(self.srcdir)
