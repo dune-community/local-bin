@@ -1,7 +1,10 @@
 #!/bin/bash
+BASEDIR="$(cd "$(dirname ${BASH_SOURCE[0]})" ; cd .. ;  pwd -P )"
+
+cd ${BASEDIR}
 
 echo -ne "writing path definitions... "
-./local/bin/gen_path.py
+./bin/gen_path.py
 if [ $? == 0 ] ; then
   source PATH.sh
   echo "done (run 'source PATH.sh' from now on)"
@@ -11,19 +14,19 @@ else
 fi
 
 echo "downloading external libraries:"
-./local/bin/download_external_libraries.py 1
+./bin/download_external_libraries.py
 if [ $? != 0 ] ; then
   exit 1
 fi
 
 echo "building external libraries:"
-./local/bin/build_external_libraries.py 1
+./bin/build_external_libraries.py
 if [ $? != 0 ] ; then
   exit 1
 fi
 
 echo "building dune modules:"
-./local/bin/build_dune_modules.py 1
+dune_setup ${1}
 if [ $? != 0 ] ; then
   exit 1
 fi
