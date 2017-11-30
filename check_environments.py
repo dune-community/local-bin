@@ -15,4 +15,4 @@ for env_dir in env_base_dir.iterdir():
         continue
     ext_cfg = env_dir / 'external-libraries.cfg'
     f = sf()
-    f.readfp(open(ext_cfg, 'rt'))
+    f.readfp(ext_cfg.open('rt'))
