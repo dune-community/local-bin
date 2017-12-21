@@ -51,7 +51,7 @@ def download_library(local_config, library, src):
             raise DownloadException('unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(
                     unsafe_name=extracted_dir_name))
         for name in names:
-            if not (name.startswith(extracted_dir_name + '/') or name is extracted_dir_name):
+            if not (name.startswith(extracted_dir_name + '/') or name == extracted_dir_name):
                 raise DownloadException('tars containing more than one toplevel dir not supported, aborting!')
 
         if os.path.exists(join(local_config.srcdir, extracted_dir_name)):
