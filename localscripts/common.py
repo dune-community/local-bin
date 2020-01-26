@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import, with_statement
 import os
+import errno
 import types
 from os.path import join
 import logging
@@ -38,7 +39,7 @@ class LocalConfig(object):
         try:
             os.makedirs(self.srcdir)
         except OSError as os_error:
-            if os_error.errno != os.errno.EEXIST:
+            if os_error.errno != errno.EEXIST:
                 raise os_error
 
         self.external_libraries_cfg_filename = external_libraries or join(self.basedir, 'external-libraries.cfg')
