@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from localscripts.gen_path import gen_path
 from localscripts.common import make_config
