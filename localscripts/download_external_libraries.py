@@ -14,10 +14,7 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-if sys.version_info[0] == 3:
-    from urllib.request import urlretrieve
-else:
-    from urllib import urlretrieve
+import requests
 from localscripts import common
 from localscripts.common import BraceMessage as Br
 
@@ -36,12 +33,14 @@ def download_library(local_config, library, src):
         filetype, _ = mimetypes.guess_type(filename)
         log.debug('not necessary (already exists)')
     else:
-        filename, headers = urlretrieve(src, dest)
-        filetype = headers['Content-Type']
+        r = requests.get(src)
+        filetype = r.headers['content-type']
         log.debug('done')
     log.debug(Br('  unpacking \'{filename}\' ', filename=filename.split('/')[-1]), end='')
     if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
-            'application/x-bzip') or filetype.startswith('application/gzip'):
+            'application/x-bzip') or filetype.startswith('application/gzip') or filetype.startswith('application/octet-stream'):
+        with open(dest, 'wb') as f:
+            f.write(r.content)
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
