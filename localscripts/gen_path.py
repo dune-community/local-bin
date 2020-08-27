@@ -7,7 +7,7 @@ from os.path import join
 
 from localscripts import common
 
-pathfile_tpl ='''
+pathfile_tpl = '''
 export BASEDIR=${BASEDIR}
 export INSTALL_PREFIX=${INSTALL_PREFIX}
 export PATH=${_INST_PREF_}/bin:$PATH
@@ -23,10 +23,13 @@ export OMP_NUM_THREADS=1
 
 def _fill_tpl(local_config):
     tpl = string.Template(pathfile_tpl)
-    return tpl.safe_substitute(INSTALL_PREFIX=local_config.install_prefix,
-                               BASEDIR=local_config.basedir,
-                               CC=local_config.cc, CXX=local_config.cxx,
-                               F77=local_config.f77, _INST_PREF_="${INSTALL_PREFIX}")
+    return tpl.safe_substitute(
+        INSTALL_PREFIX=local_config.install_prefix,
+        BASEDIR=local_config.basedir,
+        CC=local_config.cc,
+        CXX=local_config.cxx,
+        F77=local_config.f77,
+        _INST_PREF_="${INSTALL_PREFIX}")
 
 
 def gen_path(local_config):
@@ -34,4 +37,3 @@ def gen_path(local_config):
     with open(join(local_config.basedir, 'PATH.sh'), 'wt') as pathfile:
         # see common._prep_build_command on how to make this more elegant
         pathfile.write(_fill_tpl(local_config))
-

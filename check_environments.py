@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from configparser import SafeConfigParser as sf
 
-
 try:
     env_base_dir = Path(sys.argv[1])
 except IndexError:

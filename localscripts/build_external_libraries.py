@@ -22,8 +22,8 @@ def build_library(library, config, local_config):
     src_dir = local_config.srcdir if no_dir else join(local_config.srcdir, library)
     if not os.path.isdir(src_dir):
         raise Exception(
-            '\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'.format(
-                path=src_dir))
+            '\'{path}\' is not a directory (did you forget to run \'./local/bin/download_external_libraries.py\'?)!'
+            .format(path=src_dir))
     build_commands = config.get(library, 'build')
     return common.process_commands(local_config, build_commands, src_dir)
 

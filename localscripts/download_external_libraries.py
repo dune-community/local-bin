@@ -38,7 +38,8 @@ def download_library(local_config, library, src):
         log.debug('done')
     log.debug(Br('  unpacking \'{filename}\' ', filename=filename.split('/')[-1]), end='')
     if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
-            'application/x-bzip') or filetype.startswith('application/gzip') or filetype.startswith('application/octet-stream'):
+            'application/x-bzip') or filetype.startswith('application/gzip') or filetype.startswith(
+                'application/octet-stream'):
         with open(dest, 'wb') as f:
             f.write(r.content)
         tar = tarfile.open(filename)
@@ -47,8 +48,8 @@ def download_library(local_config, library, src):
         extracted_dir_name = names[0].split('/')[0]
         log.debug(Br('to \'{extracted_dir_name}\'... ', extracted_dir_name=extracted_dir_name), end='')
         if not os.path.abspath(join(local_config.srcdir, extracted_dir_name)).startswith(local_config.srcdir):
-            raise DownloadException('unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(
-                    unsafe_name=extracted_dir_name))
+            raise DownloadException(
+                'unsafe filename in tar: \'{unsafe_name}\', aborting!'.format(unsafe_name=extracted_dir_name))
         for name in names:
             if not (name.startswith(extracted_dir_name + '/') or name == extracted_dir_name):
                 raise DownloadException('tars containing more than one toplevel dir not supported, aborting!')
@@ -76,18 +77,20 @@ def git_clone_library(local_config, library, src):
         log.debug('not necessary (already exists)')
     else:
         with open(os.devnull, 'wt') as devnull:
-            subprocess.check_call('git clone ' + src + ' ' + library,
-                                  shell=True,
-                                  env=local_config.make_env(),
-                                  cwd=local_config.srcdir,
-                                  stdout=sys.stdout if common.VERBOSE else devnull,
-                                  stderr=sys.stderr if common.VERBOSE else devnull)
+            subprocess.check_call(
+                'git clone ' + src + ' ' + library,
+                shell=True,
+                env=local_config.make_env(),
+                cwd=local_config.srcdir,
+                stdout=sys.stdout if common.VERBOSE else devnull,
+                stderr=sys.stderr if common.VERBOSE else devnull)
 
 
 def download_all(local_config):
     local_config = local_config or common.LocalConfig(allow_for_broken_config_opts=True)
-    log.debug(Br('reading \'{filename}\': ', filename=os.path.basename(local_config.external_libraries_cfg_filename)),
-              end='')
+    log.debug(
+        Br('reading \'{filename}\': ', filename=os.path.basename(local_config.external_libraries_cfg_filename)),
+        end='')
     ext_libs_config = configparser.ConfigParser()
     try:
         ext_libs_config.readfp(open(local_config.external_libraries_cfg_filename, mode='rt'))
@@ -115,8 +118,9 @@ def download_all(local_config):
             elif ext_libs_config.has_option(library, 'src'):
                 download_library(local_config=local_config, library=library, src=ext_libs_config.get(library, 'src'))
             else:
-                log.debug(Br('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!',
-                          library=library))
+                log.debug(
+                    Br('missing \'src=some_url\' or \'git=some_git_url\' in section \'{library}\', aborting!',
+                       library=library))
             log.info('done')
         except Exception:
             failures += 1
