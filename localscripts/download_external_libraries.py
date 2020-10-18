@@ -30,6 +30,7 @@ def download_library(local_config, library, src):
     dest = join(local_config.srcdir, os.path.basename(src))
     filename = join(local_config.srcdir, dest)
     if os.path.exists(filename):
+        r = None
         filetype, _ = mimetypes.guess_type(filename)
         log.debug('not necessary (already exists)')
     else:
@@ -40,8 +41,9 @@ def download_library(local_config, library, src):
     if filetype.startswith('application/x-gzip') or filetype.startswith('application/x-tar') or filetype.startswith(
             'application/x-bzip') or filetype.startswith('application/gzip') or filetype.startswith(
                 'application/octet-stream'):
-        with open(dest, 'wb') as f:
-            f.write(r.content)
+        if r is not None:
+            with open(dest, 'wb') as f:
+                f.write(r.content)
         tar = tarfile.open(filename)
         # get the leading directory name
         names = tar.getnames()
